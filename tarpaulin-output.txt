@@ -1,0 +1,51 @@
+[2m2026-09-07T20:22:23.637304Z[0m [32m INFO[0m [2mcargo_tarpaulin::config[0m[2m:[0m Creating config
+[2m2026-09-07T20:22:24.920319Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Running Tarpaulin
+[2m2026-09-07T20:22:24.920338Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Building project
+[2m2026-09-07T20:22:24.933622Z[0m [32m INFO[0m [2mcargo_tarpaulin::cargo[0m[2m:[0m Cleaning project
+[2m2026-09-07T20:25:28.946975Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m running /home/runner/work/game-systems-web/game-systems-web/target/debug/deps/sweetrpg_game_systems_web-a51ad6a7251b2f51
+[2m2026-09-07T20:25:28.947103Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m Setting LLVM_PROFILE_FILE
+
+running 22 tests
+test build_info::tests::leaves_bare_version_unchanged ... ok
+test build_info::tests::leaves_dev_placeholder_unchanged ... ok
+test build_info::tests::strips_leading_v_from_tag_version ... ok
+test game_systems_client::tests::create_maps_400_to_bad_request_with_message ... ok
+test game_systems_client::tests::create_maps_403_to_forbidden ... ok
+test game_systems_client::tests::get_maps_404_to_not_found ... ok
+test game_systems_client::tests::list_decodes_the_paginated_envelope ... ok
+test i18n::tests::accept_language_region_tag_matches_base_locale ... ok
+test i18n::tests::cookie_override_wins_over_accept_language ... ok
+test i18n::tests::english_translator_resolves_a_known_key ... ok
+test i18n::tests::missing_everything_falls_back_to_english ... ok
+test i18n::tests::unsupported_accept_language_and_no_cookie_falls_back_to_english ... ok
+test i18n::tests::unsupported_cookie_falls_through_to_accept_language ... ok
+test routes::systems::tests::disallowed_sort_is_dropped ... ok
+test routes::systems::tests::no_write_role_for_plain_viewer ... ok
+test routes::systems::tests::page_url_carries_search_and_sort ... ok
+test routes::systems::tests::parse_tags_splits_and_trims ... ok
+test routes::systems::tests::write_role_detected_for_submitter ... ok
+test session_client::tests::disabled_client_returns_no_user_without_making_a_request ... ok
+test session_client::tests::repeated_calls_after_a_failed_connection_dont_panic_or_deadlock ... ok
+test session_client::tests::unreachable_redis_fails_open ... ok
+test session_client::tests::unreachable_redis_fails_open_with_a_password_configured ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 37.81s
+
+[2m2026-09-07T20:26:06.765720Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m For binary: target/debug/deps/sweetrpg_game_systems_web-a51ad6a7251b2f51
+[2m2026-09-07T20:26:06.765739Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Generated: target/tarpaulin/profraws/sweetrpg_game_systems_web-a51ad6a7251b2f51_3648932702343845140_0-16108.profraw
+[2m2026-09-07T20:26:06.765744Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Merging coverage reports
+[2m2026-09-07T20:26:06.905783Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Mapping coverage data to source
+[2m2026-09-07T20:26:07.487026Z[0m [32m INFO[0m [2mcargo_tarpaulin::report[0m[2m:[0m Coverage Results:
+[2m2026-09-07T20:26:07.488083Z[0m [32m INFO[0m [2mcargo_tarpaulin::report::html[0m[2m:[0m HTML report written to /home/runner/work/game-systems-web/game-systems-web/coverage/tarpaulin-report.html
+|| Tested/Total Lines:
+|| src/build_info.rs: 4/23
+|| src/config.rs: 0/12
+|| src/game_systems_client.rs: 47/65
+|| src/i18n.rs: 19/69
+|| src/main.rs: 0/40
+|| src/routes/health.rs: 0/6
+|| src/routes/systems.rs: 19/168
+|| src/session_client.rs: 21/49
+|| src/telemetry.rs: 0/27
+|| 
+23.97% coverage, 110/459 lines covered
