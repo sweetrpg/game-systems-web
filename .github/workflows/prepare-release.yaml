@@ -1,0 +1,16 @@
+name: Prepare Release
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare:
+    uses: sweetrpg/github-actions/.github/workflows/rust-prepare-release.yaml@master
+    with:
+      project-number: 12 # "Game System Service"
+      commit-files: "Cargo.toml Cargo.lock CHANGELOG.md"
+    secrets: inherit

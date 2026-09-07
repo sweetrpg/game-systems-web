@@ -1,0 +1,21 @@
+name: PR
+
+on:
+  pull_request:
+    branches: [develop, master]
+
+permissions:
+  contents: write
+
+jobs:
+  ci:
+    uses: sweetrpg/github-actions/.github/workflows/rust-ci.yaml@master
+    with:
+      publish-coverage: false
+
+  locale-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check for hardcoded user-facing template strings
+        run: ./scripts/check-template-strings.sh

@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ci:
+    uses: sweetrpg/github-actions/.github/workflows/rust-ci.yaml@master
+
+  locale-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check for hardcoded user-facing template strings
+        run: ./scripts/check-template-strings.sh
