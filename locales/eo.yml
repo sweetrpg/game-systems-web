@@ -1,0 +1,10 @@
+# Esperanto stub locale for game-systems-web. Intentionally partial: keys absent here fall
+# back to `locales/en.yml`, exercising the English-fallback path in `src/i18n.rs`.
+site:
+  title: Ludsistemoj
+menu:
+  log_in: Ensaluti
+  log_out: Elsaluti
+browse:
+  title: Ludsistemoj
+  search_submit: Serĉi

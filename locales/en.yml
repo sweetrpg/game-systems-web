@@ -1,0 +1,33 @@
+# Locale resources for game-systems-web. English is the default/fallback locale; add new
+# locales as `locales/<code>.yml` plus an entry in `SUPPORTED_LOCALES` in `src/i18n.rs`.
+# Keys are namespaced by template/feature.
+site:
+  title: Game Systems
+menu:
+  log_in: Log in
+  log_out: Log out
+browse:
+  title: Game systems
+  search_label: Search by name
+  search_placeholder: System name
+  search_submit: Search
+  empty: No game systems match your search.
+  prev: Previous
+  next: Next
+  add_new: Add a system
+detail:
+  edition: Edition
+  publisher: Publisher
+  notes: Notes
+  tags: Tags
+  version_history: View version history
+new:
+  title: Propose a game system
+  field_system_id: System ID
+  field_name: Name
+  field_edition: Edition
+  field_publisher: Publisher ID
+  field_notes: Notes
+  field_tags: Tags (comma-separated)
+  submit: Submit for review
+  not_authorized: You do not have permission to add a game system.

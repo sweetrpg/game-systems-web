@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tr.new_title() }}{% endblock %}
+
+{% block content %}
+<section class="new-system">
+    <h1>{{ tr.new_title() }}</h1>
+
+    {% match error %}
+    {% when Some with (message) %}
+    <p class="form-error" role="alert">{{ message }}</p>
+    {% when None %}
+    {% endmatch %}
+
+    <form method="post" action="/game-systems/new">
+        <label for="system_id">{{ tr.new_field_system_id() }}</label>
+        <input type="text" id="system_id" name="system_id" value="{{ form.system_id }}" required>
+
+        <label for="name">{{ tr.new_field_name() }}</label>
+        <input type="text" id="name" name="name" value="{{ form.name }}" required>
+
+        <label for="edition">{{ tr.new_field_edition() }}</label>
+        <input type="text" id="edition" name="edition" value="{{ form.edition }}">
+
+        <label for="publisher_id">{{ tr.new_field_publisher() }}</label>
+        <input type="text" id="publisher_id" name="publisher_id" value="{{ form.publisher_id }}">
+
+        <label for="notes">{{ tr.new_field_notes() }}</label>
+        <textarea id="notes" name="notes">{{ form.notes }}</textarea>
+
+        <label for="tags">{{ tr.new_field_tags() }}</label>
+        <input type="text" id="tags" name="tags" value="{{ form.tags }}">
+
+        <button type="submit">{{ tr.new_submit() }}</button>
+    </form>
+</section>
+{% endblock %}

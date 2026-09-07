@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tr.browse_title() }}{% endblock %}
+
+{% block content %}
+<section class="browse">
+    <div class="browse-head">
+        <h1>{{ tr.browse_title() }}</h1>
+        {% if can_add %}
+        <a class="add-new" href="/game-systems/new">{{ tr.browse_add_new() }}</a>
+        {% endif %}
+    </div>
+
+    <form class="search" method="get" action="/game-systems">
+        <label for="q">{{ tr.browse_search_label() }}</label>
+        <input type="search" id="q" name="q" value="{{ search }}" placeholder="{{ tr.browse_search_placeholder() }}">
+        {% if !sort.is_empty() %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        <button type="submit">{{ tr.browse_search_submit() }}</button>
+    </form>
+
+    {% if rows.is_empty() %}
+    <p class="empty">{{ tr.browse_empty() }}</p>
+    {% else %}
+    <ul class="system-list">
+        {% for row in rows %}
+        <li>
+            <a href="/game-systems/{{ row.id }}">{{ row.name }}</a>
+            {% if !row.edition.is_empty() %}<span class="edition">{{ row.edition }}</span>{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <nav class="pager">
+        {% if has_prev %}<a rel="prev" href="{{ prev_url }}">{{ tr.browse_prev() }}</a>{% endif %}
+        <span class="page">{{ page }}</span>
+        {% if has_next %}<a rel="next" href="{{ next_url }}">{{ tr.browse_next() }}</a>{% endif %}
+    </nav>
+    {% endif %}
+</section>
+{% endblock %}

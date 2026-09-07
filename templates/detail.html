@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ system.name }}{% endblock %}
+
+{% block content %}
+<article class="system-detail">
+    <h1>{{ system.name }}</h1>
+
+    {% if !system.edition.is_empty() %}
+    <p class="field"><span class="label">{{ tr.detail_edition() }}</span> {{ system.edition }}</p>
+    {% endif %}
+
+    {% if !system.publisher_id.is_empty() %}
+    <p class="field"><span class="label">{{ tr.detail_publisher() }}</span> {{ system.publisher_id }}</p>
+    {% endif %}
+
+    {% if !system.notes.is_empty() %}
+    <section class="notes">
+        <h2>{{ tr.detail_notes() }}</h2>
+        <p>{{ system.notes }}</p>
+    </section>
+    {% endif %}
+
+    {% if !system.tags.is_empty() %}
+    <section class="tags">
+        <h2>{{ tr.detail_tags() }}</h2>
+        <ul>
+            {% for tag in system.tags %}
+            <li>{{ tag }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    <p class="history-link"><a href="{{ version_history_url }}">{{ tr.detail_version_history() }}</a></p>
+</article>
+{% endblock %}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ tr.site_title() }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ shared_url }}/static/css/main.css">
+    <link rel="icon" href="{{ shared_url }}/static/img/favicon.ico">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="/game-systems">{{ tr.site_title() }}</a>
+        <nav class="account">
+            {% match current_user_name %}
+            {% when Some with (name) %}
+            <span class="account-name">{{ name }}</span>
+            <a href="{{ logout_url }}">{{ tr.menu_log_out() }}</a>
+            {% when None %}
+            <a href="{{ login_url }}">{{ tr.menu_log_in() }}</a>
+            {% endmatch %}
+        </nav>
+    </header>
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <span class="version">v{{ version }}</span>
+        <span class="sep">&middot;</span>
+        <span class="hash">{{ build_hash }}</span>
+    </footer>
+</body>
+</html>
