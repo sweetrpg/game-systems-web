@@ -13,7 +13,7 @@ data:
     # auth-web's own dedicated Redis - this app only reads the shared session. DB 0 matches
     # main-web's config against the same instance. REDIS_DB=1 is reserved for this service's
     # own future cache, not the shared session (see docs/frontend-conventions.md).
-    SHARED_SESSION_REDIS_HOST: cache.sweetrpg-auth.svc.cluster.local
+    SHARED_SESSION_REDIS_HOST: redis.sweetrpg-auth.svc.cluster.local
     SHARED_SESSION_REDIS_PORT: "6379"
     SHARED_SESSION_REDIS_DB: "0"
     ENV: local
