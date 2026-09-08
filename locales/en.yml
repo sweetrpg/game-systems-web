@@ -6,8 +6,21 @@ site:
 menu:
   log_in: Log in
   log_out: Log out
+  switch_app: Switch app
+  profile: Profile
+  administration: Administration
+  theme: Theme
+  theme_light: Light
+  theme_dark: Dark
+  theme_system: System
+nav:
+  main: Main
+  catalog: Catalog
+  game_room: Game Room
+  initiative: Initiative
 browse:
   title: Game systems
+  col_name: Name
   search_label: Search by name
   search_placeholder: System name
   search_submit: Search

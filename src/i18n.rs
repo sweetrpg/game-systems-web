@@ -69,6 +69,42 @@ impl Tr {
     pub fn menu_log_out(&self) -> String {
         self.s("menu.log_out")
     }
+    pub fn menu_switch_app(&self) -> String {
+        self.s("menu.switch_app")
+    }
+    pub fn menu_profile(&self) -> String {
+        self.s("menu.profile")
+    }
+    pub fn menu_administration(&self) -> String {
+        self.s("menu.administration")
+    }
+    pub fn menu_theme(&self) -> String {
+        self.s("menu.theme")
+    }
+    pub fn menu_theme_light(&self) -> String {
+        self.s("menu.theme_light")
+    }
+    pub fn menu_theme_dark(&self) -> String {
+        self.s("menu.theme_dark")
+    }
+    pub fn menu_theme_system(&self) -> String {
+        self.s("menu.theme_system")
+    }
+    pub fn nav_main(&self) -> String {
+        self.s("nav.main")
+    }
+    pub fn nav_catalog(&self) -> String {
+        self.s("nav.catalog")
+    }
+    pub fn nav_game_room(&self) -> String {
+        self.s("nav.game_room")
+    }
+    pub fn nav_initiative(&self) -> String {
+        self.s("nav.initiative")
+    }
+    pub fn browse_col_name(&self) -> String {
+        self.s("browse.col_name")
+    }
     pub fn browse_title(&self) -> String {
         self.s("browse.title")
     }
