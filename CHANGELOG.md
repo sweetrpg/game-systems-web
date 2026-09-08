@@ -1,3 +1,14 @@
+
+## 0.1.1 - 2026-09-08
+
+### Documentation
+- Restore header order after git-cliff 0.1.0 mangle
+
+
+### Fixed
+- Point openfeature featureflagsource at sweetrpg-system namespace
+
+
 # Changelog
 
 ## 0.1.0 - 2026-09-08
