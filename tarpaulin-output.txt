@@ -1,9 +1,9 @@
-[2m2026-09-08T14:33:14.468145Z[0m [32m INFO[0m [2mcargo_tarpaulin::config[0m[2m:[0m Creating config
-[2m2026-09-08T14:33:15.049906Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Running Tarpaulin
-[2m2026-09-08T14:33:15.049919Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Building project
-[2m2026-09-08T14:33:15.061296Z[0m [32m INFO[0m [2mcargo_tarpaulin::cargo[0m[2m:[0m Cleaning project
-[2m2026-09-08T14:34:48.435217Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m running /home/runner/work/game-systems-web/game-systems-web/target/debug/deps/sweetrpg_game_systems_web-410a3ac960eb5123
-[2m2026-09-08T14:34:48.435321Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m Setting LLVM_PROFILE_FILE
+[2m2026-09-08T14:42:21.806036Z[0m [32m INFO[0m [2mcargo_tarpaulin::config[0m[2m:[0m Creating config
+[2m2026-09-08T14:42:22.337679Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Running Tarpaulin
+[2m2026-09-08T14:42:22.337693Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Building project
+[2m2026-09-08T14:42:22.348542Z[0m [32m INFO[0m [2mcargo_tarpaulin::cargo[0m[2m:[0m Cleaning project
+[2m2026-09-08T14:43:36.329528Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m running /home/runner/work/game-systems-web/game-systems-web/target/debug/deps/sweetrpg_game_systems_web-1bfd67c3775085d8
+[2m2026-09-08T14:43:36.329612Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m Setting LLVM_PROFILE_FILE
 
 running 27 tests
 test build_info::tests::leaves_bare_version_unchanged ... ok
@@ -34,14 +34,14 @@ test session_client::tests::session_user_without_access_token_decodes_with_none 
 test session_client::tests::unreachable_redis_fails_open ... ok
 test session_client::tests::unreachable_redis_fails_open_with_a_password_configured ... ok
 
-test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 37.82s
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 37.81s
 
-[2m2026-09-08T14:35:26.254429Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m For binary: target/debug/deps/sweetrpg_game_systems_web-410a3ac960eb5123
-[2m2026-09-08T14:35:26.254443Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Generated: target/tarpaulin/profraws/sweetrpg_game_systems_web-410a3ac960eb5123_11925527346158797223_0-16607.profraw
-[2m2026-09-08T14:35:26.254445Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Merging coverage reports
-[2m2026-09-08T14:35:26.380397Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Mapping coverage data to source
-[2m2026-09-08T14:35:26.892530Z[0m [32m INFO[0m [2mcargo_tarpaulin::report[0m[2m:[0m Coverage Results:
-[2m2026-09-08T14:35:26.893250Z[0m [32m INFO[0m [2mcargo_tarpaulin::report::html[0m[2m:[0m HTML report written to /home/runner/work/game-systems-web/game-systems-web/coverage/tarpaulin-report.html
+[2m2026-09-08T14:44:14.166164Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m For binary: target/debug/deps/sweetrpg_game_systems_web-1bfd67c3775085d8
+[2m2026-09-08T14:44:14.166179Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Generated: target/tarpaulin/profraws/sweetrpg_game_systems_web-1bfd67c3775085d8_8256208992258636860_0-16487.profraw
+[2m2026-09-08T14:44:14.166183Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Merging coverage reports
+[2m2026-09-08T14:44:14.278665Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Mapping coverage data to source
+[2m2026-09-08T14:44:14.742735Z[0m [32m INFO[0m [2mcargo_tarpaulin::report[0m[2m:[0m Coverage Results:
+[2m2026-09-08T14:44:14.743379Z[0m [32m INFO[0m [2mcargo_tarpaulin::report::html[0m[2m:[0m HTML report written to /home/runner/work/game-systems-web/game-systems-web/coverage/tarpaulin-report.html
 || Tested/Total Lines:
 || src/build_info.rs: 23/23
 || src/config.rs: 12/12
