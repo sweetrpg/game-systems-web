@@ -68,6 +68,19 @@ fn has_write_role(user: &SessionUser) -> bool {
     user.roles.iter().any(|r| WRITE_ROLES.contains(&r.as_str()))
 }
 
+/// The id to address a system by in a detail/version link. `game-systems-api`'s
+/// `GET /systems/:id` resolves `record_id` (and `system_id`), not the current version
+/// document's `_id` that the payload exposes as `id`; a link built from `id` 404s. Prefer
+/// `record_id`, falling back to `id` if the API ever stops sending it. See the game-systems-api
+/// id-exposure inconsistency flagged with the game-systems-web change.
+fn link_id(view: &GameSystemView) -> &str {
+    if view.record_id.is_empty() {
+        &view.id
+    } else {
+        &view.record_id
+    }
+}
+
 /// Maps an upstream client error to the HTTP status whose shared error page the platform's
 /// `errors-shared-web` Traefik middleware renders.
 fn upstream_status(err: &ClientError) -> StatusCode {
@@ -150,7 +163,7 @@ async fn detail(
 
     match state.api.get(&id).await {
         Ok(view) => {
-            let system_id = view.id.clone();
+            let system_id = link_id(&view).to_string();
             render(DetailTemplate {
                 shared_url: state.config.shared_url.clone(),
                 version: state.build_info.version.clone(),
@@ -258,7 +271,7 @@ async fn browse(
                 .systems
                 .into_iter()
                 .map(|s| BrowseRow {
-                    id: s.id,
+                    id: link_id(&s).to_string(),
                     name: s.name,
                     edition: s.edition,
                 })
