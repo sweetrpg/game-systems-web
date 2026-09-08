@@ -1,4 +1,11 @@
 
+## 0.1.2 - 2026-09-08
+
+### Fixed
+- Serve pages at the root, not under /game-systems
+
+
+
 ## 0.1.1 - 2026-09-08
 
 ### Documentation
