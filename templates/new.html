@@ -1,37 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}{{ tr.new_title() }}{% endblock %}
+{% block title %}{{ chrome.tr.new_title() }}{% endblock %}
 
 {% block content %}
-<section class="new-system">
-    <h1>{{ tr.new_title() }}</h1>
+<div class="page-header">
+    <h2>{{ chrome.tr.new_title() }}</h2>
+</div>
 
-    {% match error %}
-    {% when Some with (message) %}
-    <p class="form-error" role="alert">{{ message }}</p>
-    {% when None %}
-    {% endmatch %}
+{% match error %}
+{% when Some with (message) %}
+<div class="banner banner-error" role="alert">{{ message }}</div>
+{% when None %}
+{% endmatch %}
 
-    <form method="post" action="/game-systems/new">
-        <label for="system_id">{{ tr.new_field_system_id() }}</label>
-        <input type="text" id="system_id" name="system_id" value="{{ form.system_id }}" required>
+<form class="form" method="post" action="{{ chrome.base_path }}/new">
+    <label class="form-label" for="system_id">{{ chrome.tr.new_field_system_id() }}</label>
+    <input class="input" type="text" id="system_id" name="system_id" value="{{ form.system_id }}" required>
 
-        <label for="name">{{ tr.new_field_name() }}</label>
-        <input type="text" id="name" name="name" value="{{ form.name }}" required>
+    <label class="form-label" for="name">{{ chrome.tr.new_field_name() }}</label>
+    <input class="input" type="text" id="name" name="name" value="{{ form.name }}" required>
 
-        <label for="edition">{{ tr.new_field_edition() }}</label>
-        <input type="text" id="edition" name="edition" value="{{ form.edition }}">
+    <label class="form-label" for="edition">{{ chrome.tr.new_field_edition() }}</label>
+    <input class="input" type="text" id="edition" name="edition" value="{{ form.edition }}">
 
-        <label for="publisher_id">{{ tr.new_field_publisher() }}</label>
-        <input type="text" id="publisher_id" name="publisher_id" value="{{ form.publisher_id }}">
+    <label class="form-label" for="publisher_id">{{ chrome.tr.new_field_publisher() }}</label>
+    <input class="input" type="text" id="publisher_id" name="publisher_id" value="{{ form.publisher_id }}">
 
-        <label for="notes">{{ tr.new_field_notes() }}</label>
-        <textarea id="notes" name="notes">{{ form.notes }}</textarea>
+    <label class="form-label" for="notes">{{ chrome.tr.new_field_notes() }}</label>
+    <textarea class="input" id="notes" name="notes">{{ form.notes }}</textarea>
 
-        <label for="tags">{{ tr.new_field_tags() }}</label>
-        <input type="text" id="tags" name="tags" value="{{ form.tags }}">
+    <label class="form-label" for="tags">{{ chrome.tr.new_field_tags() }}</label>
+    <input class="input" type="text" id="tags" name="tags" value="{{ form.tags }}">
 
-        <button type="submit">{{ tr.new_submit() }}</button>
-    </form>
-</section>
+    <div class="form-actions">
+        <button class="btn btn-primary" type="submit">{{ chrome.tr.new_submit() }}</button>
+    </div>
+</form>
 {% endblock %}

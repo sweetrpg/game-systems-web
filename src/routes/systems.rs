@@ -37,7 +37,53 @@ fn login_url(return_to: &str) -> String {
     format!("/auth/login?return_to={}", urlencode(return_to))
 }
 
-const LOGOUT_URL: &str = "/auth/logout";
+fn logout_url(return_to: &str) -> String {
+    format!("/auth/logout?return_to={}", urlencode(return_to))
+}
+
+/// Everything the shared nav + footer (`base.html`) need, built once per request. Keeps the
+/// shared `shared-web` class vocabulary (`.nav`, `.avatar-menu`, `.app-switcher`, `.footer`)
+/// fed from one place - see PADR-0021.
+struct Chrome {
+    shared_url: String,
+    base_path: &'static str,
+    is_authed: bool,
+    avatar_initial: String,
+    user_name: String,
+    user_email: String,
+    is_admin: bool,
+    login_url: String,
+    logout_url: String,
+    version: String,
+    build_timestamp: String,
+    build_hash: String,
+    tr: Tr,
+}
+
+impl Chrome {
+    /// `return_to` is the browser-facing path of the current page (prefixed with `BASE_PATH`),
+    /// used for the sign-in / sign-out round trip back here.
+    fn new(state: &AppState, tr: Tr, user: Option<&SessionUser>, return_to: &str) -> Self {
+        Self {
+            shared_url: state.config.shared_url.clone(),
+            base_path: BASE_PATH,
+            is_authed: user.is_some(),
+            avatar_initial: user
+                .and_then(|u| u.name.chars().next())
+                .map(|c| c.to_uppercase().to_string())
+                .unwrap_or_default(),
+            user_name: user.map(|u| u.name.clone()).unwrap_or_default(),
+            user_email: user.and_then(|u| u.email.clone()).unwrap_or_default(),
+            is_admin: user.is_some_and(|u| u.roles.iter().any(|r| r == "admin")),
+            login_url: login_url(return_to),
+            logout_url: logout_url(return_to),
+            version: state.build_info.version.clone(),
+            build_timestamp: state.build_info.date.clone(),
+            build_hash: state.build_info.sha.clone(),
+            tr,
+        }
+    }
+}
 
 /// Routes are registered root-relative. The dev/local Ingress strips the `/game-systems` path
 /// prefix (`strip-prefix-game-systems` middleware) before the request reaches the app, so it
@@ -109,13 +155,7 @@ fn render<T: Template>(tpl: T) -> Response {
 #[derive(Template)]
 #[template(path = "detail.html")]
 struct DetailTemplate {
-    shared_url: String,
-    version: String,
-    build_hash: String,
-    current_user_name: Option<String>,
-    login_url: String,
-    logout_url: String,
-    tr: Tr,
+    chrome: Chrome,
     system: SystemView,
     version_history_url: String,
 }
@@ -165,14 +205,13 @@ async fn detail(
         Ok(view) => {
             let system_id = link_id(&view).to_string();
             render(DetailTemplate {
-                shared_url: state.config.shared_url.clone(),
-                version: state.build_info.version.clone(),
-                build_hash: state.build_info.sha.clone(),
-                current_user_name: user.as_ref().map(|u| u.name.clone()),
-                login_url: login_url(BASE_PATH),
-                logout_url: LOGOUT_URL.to_string(),
-                tr,
-                version_history_url: format!("/game-systems/{system_id}/versions"),
+                chrome: Chrome::new(
+                    &state,
+                    tr,
+                    user.as_ref(),
+                    &format!("{BASE_PATH}/{system_id}"),
+                ),
+                version_history_url: format!("{BASE_PATH}/{system_id}/versions"),
                 system: view.into(),
             })
         }
@@ -198,13 +237,7 @@ struct BrowseParams {
 #[derive(Template)]
 #[template(path = "browse.html")]
 struct BrowseTemplate {
-    shared_url: String,
-    version: String,
-    build_hash: String,
-    current_user_name: Option<String>,
-    login_url: String,
-    logout_url: String,
-    tr: Tr,
+    chrome: Chrome,
     search: String,
     sort: String,
     rows: Vec<BrowseRow>,
@@ -279,13 +312,7 @@ async fn browse(
             let has_prev = page > 1;
             let has_next = (page as i64) * (per_page as i64) < result.total;
             render(BrowseTemplate {
-                shared_url: state.config.shared_url.clone(),
-                version: state.build_info.version.clone(),
-                build_hash: state.build_info.sha.clone(),
-                current_user_name: user.as_ref().map(|u| u.name.clone()),
-                login_url: login_url(BASE_PATH),
-                logout_url: LOGOUT_URL.to_string(),
-                tr,
+                chrome: Chrome::new(&state, tr, user.as_ref(), &format!("{BASE_PATH}/")),
                 prev_url: page_url(&search, &sort, page.saturating_sub(1).max(1)),
                 next_url: page_url(&search, &sort, page + 1),
                 can_add: user.as_ref().map(has_write_role).unwrap_or(false),
@@ -311,13 +338,7 @@ async fn browse(
 #[derive(Template)]
 #[template(path = "new.html")]
 struct NewTemplate {
-    shared_url: String,
-    version: String,
-    build_hash: String,
-    current_user_name: Option<String>,
-    login_url: String,
-    logout_url: String,
-    tr: Tr,
+    chrome: Chrome,
     error: Option<String>,
     form: NewFormValues,
 }
@@ -381,13 +402,7 @@ fn new_page(
     form: NewFormValues,
 ) -> Response {
     render(NewTemplate {
-        shared_url: state.config.shared_url.clone(),
-        version: state.build_info.version.clone(),
-        build_hash: state.build_info.sha.clone(),
-        current_user_name: Some(user.name.clone()),
-        login_url: login_url(BASE_PATH),
-        logout_url: LOGOUT_URL.to_string(),
-        tr,
+        chrome: Chrome::new(state, tr, Some(user), &format!("{BASE_PATH}/new")),
         error,
         form,
     })

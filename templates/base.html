@@ -3,32 +3,97 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}{{ tr.site_title() }}{% endblock %}</title>
-    <link rel="stylesheet" href="{{ shared_url }}/static/css/main.css">
-    <link rel="icon" href="{{ shared_url }}/static/img/favicon.ico">
+    <title>{% block title %}{{ chrome.tr.site_title() }}{% endblock %} - SweetRPG</title>
+    <link rel="icon" type="image/png" href="{{ chrome.shared_url }}/static/img/favicon.png">
+    <link rel="stylesheet" href="{{ chrome.shared_url }}/static/css/main.css">
+    <link rel="stylesheet" href="{{ chrome.shared_url }}/static/css/avatar-menu.css">
+    <link rel="stylesheet" href="{{ chrome.shared_url }}/static/css/app-switcher.css">
+    <script>
+    (function () {
+      var stored = null;
+      try { stored = localStorage.getItem('sweetrpg_theme_v1'); } catch (e) {}
+      var theme = stored || 'system';
+      var dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    })();
+    </script>
 </head>
 <body>
-    <header class="site-header">
-        <a class="brand" href="/game-systems">{{ tr.site_title() }}</a>
-        <nav class="account">
-            {% match current_user_name %}
-            {% when Some with (name) %}
-            <span class="account-name">{{ name }}</span>
-            <a href="{{ logout_url }}">{{ tr.menu_log_out() }}</a>
-            {% when None %}
-            <a href="{{ login_url }}">{{ tr.menu_log_in() }}</a>
-            {% endmatch %}
-        </nav>
-    </header>
+    <nav class="nav">
+        <div class="nav-brand">
+            <a href="/">
+                <img src="{{ chrome.shared_url }}/static/img/sweetrpg-logo-black.svg" alt="SweetRPG" class="nav-logo nav-logo-light">
+                <img src="{{ chrome.shared_url }}/static/img/sweetrpg-logo-white.svg" alt="SweetRPG" class="nav-logo nav-logo-dark">
+            </a>
+            <a href="{{ chrome.base_path }}/">{{ chrome.tr.site_title() }}</a>
+        </div>
+        <div class="nav-spacer"></div>
+        <div class="app-switcher">
+            <button type="button" class="app-switcher-trigger" aria-label="{{ chrome.tr.menu_switch_app() }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/>
+                    <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+                    <circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/>
+                </svg>
+            </button>
+            <div class="app-switcher-panel" hidden>
+                <a class="app-switcher-item" href="/">{{ chrome.tr.nav_main() }}</a>
+                <a class="app-switcher-item" href="/catalog">{{ chrome.tr.nav_catalog() }}</a>
+                <a class="app-switcher-item" href="/game-room">{{ chrome.tr.nav_game_room() }}</a>
+                <a class="app-switcher-item" href="/game-systems">{{ chrome.tr.site_title() }}</a>
+                <a class="app-switcher-item" href="/initiative">{{ chrome.tr.nav_initiative() }}</a>
+            </div>
+        </div>
+        <div class="avatar-menu">
+            <button type="button" class="avatar-menu-trigger">
+                {% if chrome.is_authed %}
+                <span class="avatar-menu-fallback">{{ chrome.avatar_initial }}</span>
+                {% else %}
+                <img class="avatar-menu-avatar" src="{{ chrome.shared_url }}/static/img/mystery-man.svg" alt="">
+                {% endif %}
+            </button>
+            <div class="avatar-menu-panel" hidden>
+                {% if chrome.is_authed %}
+                <div class="avatar-menu-identity">
+                    <span class="avatar-menu-name">{{ chrome.user_name }}</span>
+                    {% if !chrome.user_email.is_empty() %}<span class="avatar-menu-email">{{ chrome.user_email }}</span>{% endif %}
+                </div>
+                <hr class="avatar-menu-divider">
+                <a class="avatar-menu-item" href="/users/profile">{{ chrome.tr.menu_profile() }}</a>
+                {% if chrome.is_admin %}
+                <a class="avatar-menu-item" href="/admin">{{ chrome.tr.menu_administration() }}</a>
+                {% endif %}
+                <hr class="avatar-menu-divider">
+                <form action="{{ chrome.logout_url }}" method="post" class="avatar-menu-item-form">
+                    <button type="submit" class="avatar-menu-item avatar-menu-item-danger">{{ chrome.tr.menu_log_out() }}</button>
+                </form>
+                {% else %}
+                <a class="avatar-menu-item" href="{{ chrome.login_url }}">{{ chrome.tr.menu_log_in() }}</a>
+                {% endif %}
+                <hr class="avatar-menu-divider">
+                <div id="avatar-menu-theme-row" class="avatar-menu-theme-row" role="group" aria-label="{{ chrome.tr.menu_theme() }}">
+                    <button type="button" class="avatar-menu-theme-option" data-theme-choice="light" aria-label="{{ chrome.tr.menu_theme_light() }}"></button>
+                    <button type="button" class="avatar-menu-theme-option" data-theme-choice="dark" aria-label="{{ chrome.tr.menu_theme_dark() }}"></button>
+                    <button type="button" class="avatar-menu-theme-option" data-theme-choice="system" aria-label="{{ chrome.tr.menu_theme_system() }}"></button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-    <main class="content">
+    <main class="page">
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="site-footer">
-        <span class="version">v{{ version }}</span>
-        <span class="sep">&middot;</span>
-        <span class="hash">{{ build_hash }}</span>
+    <footer class="footer">
+        <div class="footer-links">
+            <span>&copy; 2026 Pilgrimage Software</span>
+            <a href="https://github.com/sweetrpg" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <span class="footer-build">v{{ chrome.version }} &middot; built {{ chrome.build_timestamp }} / {{ chrome.build_hash }}</span>
     </footer>
+
+    <script src="{{ chrome.shared_url }}/static/js/avatar-menu.js" defer></script>
+    <script src="{{ chrome.shared_url }}/static/js/app-switcher.js" defer></script>
+    <script src="{{ chrome.shared_url }}/static/js/theme.js" defer></script>
 </body>
 </html>
