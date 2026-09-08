@@ -27,6 +27,18 @@ const ALLOWED_SORTS: &[&str] = &["name", "-name", "created", "-created"];
 const DEFAULT_PER_PAGE: u32 = 24;
 const MAX_PER_PAGE: u32 = 100;
 
+/// Browser-facing base path of this app behind the shared-host Ingress. Links and redirects
+/// carry it; the Ingress strips it before the request reaches the app (see `router`).
+const BASE_PATH: &str = "/game-systems";
+
+/// `auth-web` sits at `/auth` on the same shared host - login/logout are fixed paths, not
+/// derived from `SHARED_URL` (which points at `shared-web`). Matches `main-web`.
+fn login_url(return_to: &str) -> String {
+    format!("/auth/login?return_to={}", urlencode(return_to))
+}
+
+const LOGOUT_URL: &str = "/auth/logout";
+
 /// Routes are registered root-relative. The dev/local Ingress strips the `/game-systems` path
 /// prefix (`strip-prefix-game-systems` middleware) before the request reaches the app, so it
 /// sees `/`, `/new`, `/{id}` - same pattern as `game-room-web`. Browser-facing links and
@@ -144,8 +156,8 @@ async fn detail(
                 version: state.build_info.version.clone(),
                 build_hash: state.build_info.sha.clone(),
                 current_user_name: user.as_ref().map(|u| u.name.clone()),
-                login_url: format!("{}/login", state.config.shared_url),
-                logout_url: format!("{}/logout", state.config.shared_url),
+                login_url: login_url(BASE_PATH),
+                logout_url: LOGOUT_URL.to_string(),
                 tr,
                 version_history_url: format!("/game-systems/{system_id}/versions"),
                 system: view.into(),
@@ -258,8 +270,8 @@ async fn browse(
                 version: state.build_info.version.clone(),
                 build_hash: state.build_info.sha.clone(),
                 current_user_name: user.as_ref().map(|u| u.name.clone()),
-                login_url: format!("{}/login", state.config.shared_url),
-                logout_url: format!("{}/logout", state.config.shared_url),
+                login_url: login_url(BASE_PATH),
+                logout_url: LOGOUT_URL.to_string(),
                 tr,
                 prev_url: page_url(&search, &sort, page.saturating_sub(1).max(1)),
                 next_url: page_url(&search, &sort, page + 1),
@@ -360,8 +372,8 @@ fn new_page(
         version: state.build_info.version.clone(),
         build_hash: state.build_info.sha.clone(),
         current_user_name: Some(user.name.clone()),
-        login_url: format!("{}/login", state.config.shared_url),
-        logout_url: format!("{}/logout", state.config.shared_url),
+        login_url: login_url(BASE_PATH),
+        logout_url: LOGOUT_URL.to_string(),
         tr,
         error,
         form,
@@ -375,7 +387,7 @@ async fn new_form(
 ) -> Response {
     let tr = tr_for(&jar, &headers);
     let Some(user) = current_user(&state, &jar).await else {
-        return Redirect::to(&format!("{}/login", state.config.shared_url)).into_response();
+        return Redirect::to(&login_url(&format!("{BASE_PATH}/new"))).into_response();
     };
     if !has_write_role(&user) {
         return (StatusCode::FORBIDDEN, Html(tr.new_not_authorized())).into_response();
@@ -391,7 +403,7 @@ async fn submit_new(
 ) -> Response {
     let tr = tr_for(&jar, &headers);
     let Some(user) = current_user(&state, &jar).await else {
-        return Redirect::to(&format!("{}/login", state.config.shared_url)).into_response();
+        return Redirect::to(&login_url(&format!("{BASE_PATH}/new"))).into_response();
     };
     if !has_write_role(&user) {
         return (StatusCode::FORBIDDEN, Html(tr.new_not_authorized())).into_response();
@@ -491,7 +503,7 @@ mod tests {
     // The Ingress strips /game-systems, so the app must serve its pages at the root. A
     // regression here 404s every page in dev while /status/ping still answers (see
     // sweetrpg/game-systems-web v0.1.2).
-    async fn route_status(uri: &str) -> axum::http::StatusCode {
+    async fn route_response(uri: &str) -> axum::http::Response<axum::body::Body> {
         use tower::ServiceExt;
         let state = std::sync::Arc::new(crate::AppState {
             config: crate::config::Config::from_env(),
@@ -501,8 +513,8 @@ mod tests {
                 "http://127.0.0.1:1".to_string(),
             ),
         });
-        let app = router().with_state(state);
-        let resp = app
+        router()
+            .with_state(state)
             .oneshot(
                 axum::http::Request::builder()
                     .uri(uri)
@@ -510,18 +522,28 @@ mod tests {
                     .unwrap(),
             )
             .await
-            .unwrap();
-        resp.status()
+            .unwrap()
+    }
+
+    async fn route_status(uri: &str) -> axum::http::StatusCode {
+        route_response(uri).await.status()
     }
 
     #[tokio::test]
     async fn pages_are_served_at_the_root_not_under_game_systems() {
         // Browse: session disabled + API unreachable -> 502, not 404. Route matched.
         assert_eq!(route_status("/").await, axum::http::StatusCode::BAD_GATEWAY);
-        // Add form with no session -> redirect to sign-in, not 404.
-        assert_eq!(
-            route_status("/new").await,
-            axum::http::StatusCode::SEE_OTHER
+        // Add form with no session -> redirect to auth-web's sign-in, not 404, not shared-web.
+        let new_resp = route_response("/new").await;
+        assert_eq!(new_resp.status(), axum::http::StatusCode::SEE_OTHER);
+        let location = new_resp
+            .headers()
+            .get(axum::http::header::LOCATION)
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or_default();
+        assert!(
+            location.starts_with("/auth/login?return_to="),
+            "unexpected sign-in redirect target: {location}"
         );
         // Detail for some id -> upstream 502, not 404. Route matched.
         assert_eq!(

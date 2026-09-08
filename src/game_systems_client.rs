@@ -47,16 +47,63 @@ pub struct GameSystemVersionRow {
 /// The paginated envelope `GET /systems` returns once query-layer pagination lands
 /// (`openspec/changes/game-systems-web`, task group 1). `total` is the count of live systems
 /// matching the search, independent of the page size.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug)]
 pub struct SystemsPage {
-    #[serde(default)]
     pub systems: Vec<GameSystemView>,
-    #[serde(default)]
     pub total: i64,
-    #[serde(default)]
     pub page: u32,
-    #[serde(default)]
     pub per_page: u32,
+}
+
+/// `GET /systems` is served in two shapes during this change's rollout: `game-systems-api`
+/// currently returns a bare JSON array of every live system (pre task group 1); afterwards it
+/// returns the `{systems,total,page,per_page}` envelope. Accept either so the browse page
+/// works before and after the API change.
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum SystemsPayload {
+    Envelope {
+        #[serde(default)]
+        systems: Vec<GameSystemView>,
+        #[serde(default)]
+        total: i64,
+        #[serde(default)]
+        page: u32,
+        #[serde(default)]
+        per_page: u32,
+    },
+    BareList(Vec<GameSystemView>),
+}
+
+impl From<SystemsPayload> for SystemsPage {
+    fn from(payload: SystemsPayload) -> Self {
+        match payload {
+            SystemsPayload::Envelope {
+                systems,
+                total,
+                page,
+                per_page,
+            } => SystemsPage {
+                total: if total > 0 {
+                    total
+                } else {
+                    systems.len() as i64
+                },
+                page: page.max(1),
+                per_page: per_page.max(1),
+                systems,
+            },
+            // Bare array: the API returned every live system with no server-side paging. Show
+            // them all as one page; the pager collapses (has_next is false). Replaced by real
+            // pagination once task group 1 ships.
+            SystemsPayload::BareList(systems) => SystemsPage {
+                total: systems.len() as i64,
+                page: 1,
+                per_page: systems.len().max(1) as u32,
+                systems,
+            },
+        }
+    }
 }
 
 /// Query parameters for the browse/search list, forwarded verbatim to `game-systems-api`. The
@@ -168,7 +215,8 @@ impl GameSystemsApiClient {
             .send()
             .await
             .map_err(|e| ClientError::Upstream(e.to_string()))?;
-        self.decode(resp).await
+        let payload: SystemsPayload = self.decode(resp).await?;
+        Ok(payload.into())
     }
 
     /// `GET /systems/:id` - resolves `id` as a document id or a `system_id` slug server-side.
@@ -260,6 +308,26 @@ mod tests {
         assert_eq!(page.total, 1);
         assert_eq!(page.systems.len(), 1);
         assert_eq!(page.systems[0].name, "Dungeon Quest");
+    }
+
+    #[tokio::test]
+    async fn list_decodes_a_bare_array_from_the_pre_pagination_api() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/systems"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"id": "gs1", "name": "Dungeon Quest", "edition": "1e"},
+                {"id": "gs2", "name": "Star Frontier", "edition": "2e"}
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GameSystemsApiClient::new(server.uri());
+        let page = client.list(&ListQuery::default()).await.unwrap();
+        assert_eq!(page.systems.len(), 2);
+        assert_eq!(page.total, 2);
+        assert_eq!(page.page, 1);
+        assert_eq!(page.systems[1].name, "Star Frontier");
     }
 
     #[tokio::test]
