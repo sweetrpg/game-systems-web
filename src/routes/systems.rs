@@ -94,6 +94,7 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/", get(browse))
         .route("/new", get(new_form).post(submit_new))
         .route("/{id}", get(detail))
+        .route("/{id}/versions", get(version_history))
 }
 
 // ---------------------------------------------------------------------------
@@ -217,6 +218,76 @@ async fn detail(
         }
         Err(err) => {
             tracing::warn!(error = %err, system = %id, "detail lookup failed");
+            upstream_status(&err).into_response()
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// GET /game-systems/:id/versions  - version history
+// ---------------------------------------------------------------------------
+
+#[derive(Template)]
+#[template(path = "versions.html")]
+struct VersionsTemplate {
+    chrome: Chrome,
+    system_name: String,
+    detail_url: String,
+    rows: Vec<VersionRow>,
+}
+
+struct VersionRow {
+    version: i64,
+    name: String,
+    edition: String,
+    state: String,
+}
+
+async fn version_history(
+    State(state): State<Arc<AppState>>,
+    jar: CookieJar,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+) -> Response {
+    let tr = tr_for(&jar, &headers);
+    let user = current_user(&state, &jar).await;
+
+    // The current-view lookup and the version list are separate upstream calls; the detail
+    // fetch also gives the resolvable link id and the display name for the heading.
+    let view = match state.api.get(&id).await {
+        Ok(view) => view,
+        Err(err) => {
+            tracing::warn!(error = %err, system = %id, "version-history: system lookup failed");
+            return upstream_status(&err).into_response();
+        }
+    };
+    let system_id = link_id(&view).to_string();
+
+    match state.api.versions(&system_id).await {
+        Ok(versions) => {
+            let rows = versions
+                .into_iter()
+                .map(|v| VersionRow {
+                    version: v.version,
+                    name: v.name,
+                    edition: v.edition,
+                    state: v.state,
+                })
+                .collect();
+            render(VersionsTemplate {
+                chrome: Chrome::new(
+                    &state,
+                    tr,
+                    user.as_ref(),
+                    &format!("{BASE_PATH}/{system_id}/versions"),
+                ),
+                system_name: view.name,
+                detail_url: format!("{BASE_PATH}/{system_id}"),
+                rows,
+            })
+        }
+        Err(err) => {
+            tracing::warn!(error = %err, system = %id, "version-history list failed");
             upstream_status(&err).into_response()
         }
     }
@@ -578,9 +649,19 @@ mod tests {
             route_status("/dungeon-quest").await,
             axum::http::StatusCode::BAD_GATEWAY
         );
-        // A nested path is registered nowhere - the routes are one segment deep, at the root.
+        // Version history -> upstream 502, not 404. Route matched.
         assert_eq!(
-            route_status("/game-systems/dungeon-quest").await,
+            route_status("/dungeon-quest/versions").await,
+            axum::http::StatusCode::BAD_GATEWAY
+        );
+        // An unregistered nested path still 404s.
+        assert_eq!(
+            route_status("/dungeon-quest/history").await,
+            axum::http::StatusCode::NOT_FOUND
+        );
+        // The old prefixed path is registered nowhere - routes sit at the stripped root.
+        assert_eq!(
+            route_status("/game-systems/new").await,
             axum::http::StatusCode::NOT_FOUND
         );
     }

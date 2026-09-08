@@ -144,6 +144,21 @@ impl Tr {
     pub fn detail_version_history(&self) -> String {
         self.s("detail.version_history")
     }
+    pub fn versions_title(&self) -> String {
+        self.s("versions.title")
+    }
+    pub fn versions_back(&self) -> String {
+        self.s("versions.back")
+    }
+    pub fn versions_empty(&self) -> String {
+        self.s("versions.empty")
+    }
+    pub fn versions_col_version(&self) -> String {
+        self.s("versions.col_version")
+    }
+    pub fn versions_col_state(&self) -> String {
+        self.s("versions.col_state")
+    }
     pub fn new_title(&self) -> String {
         self.s("new.title")
     }
