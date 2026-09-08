@@ -27,11 +27,15 @@ const ALLOWED_SORTS: &[&str] = &["name", "-name", "created", "-created"];
 const DEFAULT_PER_PAGE: u32 = 24;
 const MAX_PER_PAGE: u32 = 100;
 
+/// Routes are registered root-relative. The dev/local Ingress strips the `/game-systems` path
+/// prefix (`strip-prefix-game-systems` middleware) before the request reaches the app, so it
+/// sees `/`, `/new`, `/{id}` - same pattern as `game-room-web`. Browser-facing links and
+/// redirects still carry the `/game-systems` prefix, since those go back through the Ingress.
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/game-systems", get(browse))
-        .route("/game-systems/new", get(new_form).post(submit_new))
-        .route("/game-systems/{id}", get(detail))
+        .route("/", get(browse))
+        .route("/new", get(new_form).post(submit_new))
+        .route("/{id}", get(detail))
 }
 
 // ---------------------------------------------------------------------------
@@ -482,5 +486,52 @@ mod tests {
         assert_eq!(tags.len(), 2);
         assert_eq!(tags[0].name, "fantasy");
         assert_eq!(tags[1].name, "d20");
+    }
+
+    // The Ingress strips /game-systems, so the app must serve its pages at the root. A
+    // regression here 404s every page in dev while /status/ping still answers (see
+    // sweetrpg/game-systems-web v0.1.2).
+    async fn route_status(uri: &str) -> axum::http::StatusCode {
+        use tower::ServiceExt;
+        let state = std::sync::Arc::new(crate::AppState {
+            config: crate::config::Config::from_env(),
+            build_info: crate::build_info::BuildInfo::load(),
+            session_client: crate::session_client::SessionClient::new(None, 6379, 0, None).await,
+            api: crate::game_systems_client::GameSystemsApiClient::new(
+                "http://127.0.0.1:1".to_string(),
+            ),
+        });
+        let app = router().with_state(state);
+        let resp = app
+            .oneshot(
+                axum::http::Request::builder()
+                    .uri(uri)
+                    .body(axum::body::Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        resp.status()
+    }
+
+    #[tokio::test]
+    async fn pages_are_served_at_the_root_not_under_game_systems() {
+        // Browse: session disabled + API unreachable -> 502, not 404. Route matched.
+        assert_eq!(route_status("/").await, axum::http::StatusCode::BAD_GATEWAY);
+        // Add form with no session -> redirect to sign-in, not 404.
+        assert_eq!(
+            route_status("/new").await,
+            axum::http::StatusCode::SEE_OTHER
+        );
+        // Detail for some id -> upstream 502, not 404. Route matched.
+        assert_eq!(
+            route_status("/dungeon-quest").await,
+            axum::http::StatusCode::BAD_GATEWAY
+        );
+        // A nested path is registered nowhere - the routes are one segment deep, at the root.
+        assert_eq!(
+            route_status("/game-systems/dungeon-quest").await,
+            axum::http::StatusCode::NOT_FOUND
+        );
     }
 }
