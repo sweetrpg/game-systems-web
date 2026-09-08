@@ -5,6 +5,9 @@ site:
 menu:
   log_in: Ensaluti
   log_out: Elsaluti
+  switch_app: Ŝanĝi aplikaĵon
+nav:
+  main: Ĉefa
 browse:
   title: Ludsistemoj
   search_submit: Serĉi

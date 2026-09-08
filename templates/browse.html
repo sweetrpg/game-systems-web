@@ -1,40 +1,48 @@
 {% extends "base.html" %}
 
-{% block title %}{{ tr.browse_title() }}{% endblock %}
+{% block title %}{{ chrome.tr.browse_title() }}{% endblock %}
 
 {% block content %}
-<section class="browse">
-    <div class="browse-head">
-        <h1>{{ tr.browse_title() }}</h1>
-        {% if can_add %}
-        <a class="add-new" href="/game-systems/new">{{ tr.browse_add_new() }}</a>
-        {% endif %}
-    </div>
-
-    <form class="search" method="get" action="/game-systems">
-        <label for="q">{{ tr.browse_search_label() }}</label>
-        <input type="search" id="q" name="q" value="{{ search }}" placeholder="{{ tr.browse_search_placeholder() }}">
-        {% if !sort.is_empty() %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
-        <button type="submit">{{ tr.browse_search_submit() }}</button>
-    </form>
-
-    {% if rows.is_empty() %}
-    <p class="empty">{{ tr.browse_empty() }}</p>
-    {% else %}
-    <ul class="system-list">
-        {% for row in rows %}
-        <li>
-            <a href="/game-systems/{{ row.id }}">{{ row.name }}</a>
-            {% if !row.edition.is_empty() %}<span class="edition">{{ row.edition }}</span>{% endif %}
-        </li>
-        {% endfor %}
-    </ul>
-
-    <nav class="pager">
-        {% if has_prev %}<a rel="prev" href="{{ prev_url }}">{{ tr.browse_prev() }}</a>{% endif %}
-        <span class="page">{{ page }}</span>
-        {% if has_next %}<a rel="next" href="{{ next_url }}">{{ tr.browse_next() }}</a>{% endif %}
-    </nav>
+<div class="page-header">
+    <h2>{{ chrome.tr.browse_title() }}</h2>
+    {% if can_add %}
+    <a class="btn btn-primary" href="{{ chrome.base_path }}/new">{{ chrome.tr.browse_add_new() }}</a>
     {% endif %}
-</section>
+</div>
+
+<form class="form" method="get" action="{{ chrome.base_path }}/">
+    <label class="form-label" for="q">{{ chrome.tr.browse_search_label() }}</label>
+    <div class="form-actions">
+        <input class="input" type="search" id="q" name="q" value="{{ search }}" placeholder="{{ chrome.tr.browse_search_placeholder() }}">
+        {% if !sort.is_empty() %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        <button class="btn btn-secondary" type="submit">{{ chrome.tr.browse_search_submit() }}</button>
+    </div>
+</form>
+
+{% if rows.is_empty() %}
+<p class="empty-state">{{ chrome.tr.browse_empty() }}</p>
+{% else %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ chrome.tr.browse_col_name() }}</th>
+            <th>{{ chrome.tr.detail_edition() }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr>
+            <td><a href="{{ chrome.base_path }}/{{ row.id }}">{{ row.name }}</a></td>
+            <td>{{ row.edition }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<nav class="pager">
+    {% if has_prev %}<a class="btn btn-ghost" rel="prev" href="{{ prev_url }}">{{ chrome.tr.browse_prev() }}</a>{% endif %}
+    <span class="pager-page">{{ page }}</span>
+    {% if has_next %}<a class="btn btn-ghost" rel="next" href="{{ next_url }}">{{ chrome.tr.browse_next() }}</a>{% endif %}
+</nav>
+{% endif %}
 {% endblock %}
