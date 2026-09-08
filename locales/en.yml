@@ -34,6 +34,12 @@ detail:
   notes: Notes
   tags: Tags
   version_history: View version history
+versions:
+  title: Version history
+  back: Back to system
+  empty: This system has no recorded versions.
+  col_version: Version
+  col_state: State
 new:
   title: Propose a game system
   field_system_id: System ID

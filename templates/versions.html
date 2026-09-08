@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chrome.tr.versions_title() }} - {{ system_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{{ chrome.tr.versions_title() }} <span class="card-kicker">{{ system_name }}</span></h2>
+    <a class="btn btn-ghost" href="{{ detail_url }}">{{ chrome.tr.versions_back() }}</a>
+</div>
+
+{% if rows.is_empty() %}
+<p class="empty-state">{{ chrome.tr.versions_empty() }}</p>
+{% else %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ chrome.tr.versions_col_version() }}</th>
+            <th>{{ chrome.tr.browse_col_name() }}</th>
+            <th>{{ chrome.tr.detail_edition() }}</th>
+            <th>{{ chrome.tr.versions_col_state() }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row.version }}</td>
+            <td>{{ row.name }}</td>
+            <td>{{ row.edition }}</td>
+            <td><span class="card-kicker">{{ row.state }}</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}
