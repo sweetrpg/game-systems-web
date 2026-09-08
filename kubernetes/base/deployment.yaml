@@ -21,7 +21,7 @@ spec:
             annotations:
                 reloader.stakater.com/auto: "true"
                 openfeature.dev/enabled: "true"
-                openfeature.dev/featureflagsource: "sweetrpg-game-systems/game-systems-web"
+                openfeature.dev/featureflagsource: "sweetrpg-system/game-systems-web"
         spec:
             serviceAccountName: web
             # No DNS-based service discovery of its own to opt out of the legacy env-var
