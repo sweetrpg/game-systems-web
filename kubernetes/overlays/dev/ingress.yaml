@@ -1,0 +1,39 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+    name: web-v1
+    annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        # strip-prefix-game-systems removes the /game-systems path prefix; errors-shared-web
+        # routes generic error responses to shared-web's branded pages. Order matters: strip
+        # first, then the app (and its error handling) sees unprefixed paths.
+        traefik.ingress.kubernetes.io/router.middlewares: sweetrpg-game-systems-strip-prefix-game-systems@kubernetescrd,sweetrpg-game-systems-errors-shared-web@kubernetescrd
+        kubernetes.io/ingress.class: traefik
+        cert-manager.io/cluster-issuer: letsencrypt-prd
+        # NOT the ExternalDNS owner for dev.sweetrpg.com - main-web's Ingress carries the
+        # external-dns.alpha.kubernetes.io/hostname + /target annotations for this host. Every
+        # other frontend on the shared host omits them (see docs/git-repos.md, "Shared-host
+        # Ingress ownership").
+
+spec:
+    ingressClassName: traefik
+    rules:
+        - host: dev.sweetrpg.com
+          http:
+              paths:
+                  - pathType: Prefix
+                    path: /game-systems
+                    backend:
+                        service:
+                            name: web-v1
+                            port:
+                                name: http
+    tls:
+        - hosts:
+              - dev.sweetrpg.com
+          # Shared secretName across every frontend's Ingress for this host - cert-manager
+          # reconciles them into one Certificate. Must match exactly.
+          secretName: sweetrpg-dev-tls

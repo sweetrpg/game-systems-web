@@ -1,0 +1,29 @@
+---
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+    name: web-env
+
+data:
+    SHARED_URL: https://dev.sweetrpg.com/shared
+    BUILD_INFO_PATH: /app/config/build-info.json
+    LOG_LEVEL: info
+    # Server-to-server, no ingress in the path, so no /api/0 vs /api/1 version prefix - the pod
+    # is called at its bare unprefixed routes. Pinned to api-v1 deliberately (not the api-v0
+    # latest-alias) per docs/deployment-conventions.md.
+    GAME_SYSTEMS_API_URL: http://api-v1.sweetrpg-game-systems.svc.cluster.local:8000
+    # auth-web's own dedicated Redis in sweetrpg-auth - this app only ever reads the shared
+    # session auth-web writes. Host/DB must match auth-web's own REDIS_HOST/REDIS_DB exactly; a
+    # mismatch fails open ("every visitor logged-out"), silently, with no startup error. DB 0
+    # matches main-web's own shared-session config against the same instance.
+    #
+    # NB: REDIS_DB=1 is reserved for *this service's own* future cache instance in
+    # sweetrpg-game-systems (game-systems-api would take 0) - it is not the shared-session DB.
+    # game-systems-web has no local cache today. See docs/frontend-conventions.md.
+    SHARED_SESSION_REDIS_HOST: redis.sweetrpg-auth.svc.cluster.local
+    SHARED_SESSION_REDIS_PORT: "6379"
+    SHARED_SESSION_REDIS_DB: "0"
+    # Same collector the other frontends export to (tempo-distributor's OTLP/HTTP receiver).
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo-distributor.observability.svc.cluster.local:4318
+    ENV: dev
