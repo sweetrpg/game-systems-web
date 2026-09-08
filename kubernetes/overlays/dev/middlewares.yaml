@@ -1,0 +1,37 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+
+metadata:
+    name: strip-prefix-game-systems
+
+spec:
+    stripPrefix:
+        prefixes:
+            - /game-systems
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+
+metadata:
+    name: errors-shared-web
+
+spec:
+    errors:
+        status:
+            - "400"
+            - "401"
+            - "403"
+            - "404"
+            - "500"
+            - "502"
+            - "503"
+            - "504"
+        query: /errors/{status}?service=game-systems-web
+        service:
+            name: web-v1
+            namespace: sweetrpg-shared
+            # Bare integer, not the {name: http} object form - the object form fails CRD
+            # validation for spec.errors.service.port specifically (docs/deployment-conventions.md).
+            port: 8081

@@ -1,0 +1,66 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+    name: web-v1
+
+spec:
+    strategy:
+        rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 1
+        type: RollingUpdate
+    selector:
+        matchLabels:
+            app.kubernetes.io/name: game-systems-web
+            app.kubernetes.io/version: v1
+            app.kubernetes.io/component: web
+    template:
+        metadata:
+            annotations:
+                reloader.stakater.com/auto: "true"
+                openfeature.dev/enabled: "true"
+                openfeature.dev/featureflagsource: "sweetrpg-game-systems/game-systems-web"
+        spec:
+            serviceAccountName: web
+            # No DNS-based service discovery of its own to opt out of the legacy env-var
+            # injection - cheap to disable defensively regardless (docs/service-conventions.md).
+            enableServiceLinks: false
+            imagePullSecrets:
+                - name: sweetrpg-registry
+            containers:
+                - name: app
+                  image: game-systems-web
+                  imagePullPolicy: Always
+                  envFrom:
+                      - configMapRef:
+                            name: web-common
+                      - configMapRef:
+                            name: web-env
+                      - secretRef:
+                            name: web-shared-session
+                  env: []
+                  ports:
+                      - containerPort: 8080
+                        name: http
+                  resources:
+                      requests:
+                          cpu: "10m"
+                          memory: "20Mi"
+                      limits:
+                          cpu: "0.5"
+                          memory: "256Mi"
+                  livenessProbe:
+                      httpGet:
+                          path: /status/ping
+                          port: http
+                      initialDelaySeconds: 10
+                      timeoutSeconds: 5
+                  readinessProbe:
+                      httpGet:
+                          path: /status/ping
+                          port: http
+                      initialDelaySeconds: 5
+                      timeoutSeconds: 5
+            restartPolicy: Always

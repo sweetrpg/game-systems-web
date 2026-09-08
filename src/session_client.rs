@@ -21,13 +21,15 @@ pub struct SessionUser {
     pub name: String,
     pub email: Option<String>,
     pub roles: Vec<String>,
-    /// Bearer access token for the signed-in principal, written into the shared session by
-    /// `auth-web`. `game-systems-web` forwards this on `POST /systems` so `game-systems-api`'s
-    /// `authz` middleware can run the authoritative `RequireAnyRole` check (design.md,
-    /// decision 3). `None` on a session written before `auth-web` began carrying it - the
-    /// add-new form's write path treats that as unable to authenticate and does not call the
-    /// API. Not used by `main-web`, whose copy of this struct simply ignores the extra field.
-    #[serde(default)]
+    /// The Auth0 access token from the code exchange, written into the shared session by
+    /// `auth-web` (its `SessionUser.accessToken`, JSON key `accessToken`). `game-systems-web`
+    /// forwards it as a Bearer token on `POST /systems` so `game-systems-api`'s `authz`
+    /// middleware runs the authoritative `RequireAnyRole` check - the same thing `catalog-web`
+    /// forwards to `catalog-api` for volume submission. `auth-web` has written this on every
+    /// session since the volume-edit-with-approval-workflow change; `Option` + `default` only
+    /// covers a session encoded before then. `main-web`'s copy of this struct omits the field
+    /// and simply ignores it on the wire.
+    #[serde(rename = "accessToken", default)]
     pub access_token: Option<String>,
     /// When this session becomes invalid, set by `auth-web` at write time. A session at or
     /// past this timestamp must be treated as absent, not stale data - see
@@ -147,16 +149,64 @@ impl SessionClient {
                 return None;
             }
         };
-        if user.expiry <= Utc::now() {
+        if !user.is_active(Utc::now()) {
             return None;
         }
         Some(user)
     }
 }
 
+impl SessionUser {
+    /// A session is active only strictly before its `expiry`. At or past that instant it must
+    /// be treated as absent, not as stale-but-usable data (see the `expiry` field doc).
+    pub fn is_active(&self, now: DateTime<Utc>) -> bool {
+        self.expiry > now
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::Duration;
+
+    const SAMPLE_SESSION_USER: &str = r#"{
+        "sub": "auth0|abc123",
+        "name": "Ada Lovelace",
+        "email": "ada@example.com",
+        "roles": ["submitter", "viewer"],
+        "accessToken": "tok-xyz",
+        "expiry": "2999-01-01T00:00:00Z"
+    }"#;
+
+    #[test]
+    fn decodes_a_sample_shared_session_user() {
+        let user: SessionUser = serde_json::from_str(SAMPLE_SESSION_USER).unwrap();
+        assert_eq!(user.name, "Ada Lovelace");
+        assert_eq!(user.email.as_deref(), Some("ada@example.com"));
+        assert_eq!(user.roles, vec!["submitter", "viewer"]);
+        assert_eq!(user.access_token.as_deref(), Some("tok-xyz"));
+        assert!(user.is_active(Utc::now()));
+    }
+
+    #[test]
+    fn a_session_at_or_after_expiry_is_inactive() {
+        let user: SessionUser = serde_json::from_str(SAMPLE_SESSION_USER).unwrap();
+        let expiry = user.expiry;
+        assert!(
+            !user.is_active(expiry),
+            "exactly at expiry must read as absent"
+        );
+        assert!(!user.is_active(expiry + Duration::seconds(1)));
+        assert!(user.is_active(expiry - Duration::seconds(1)));
+    }
+
+    #[test]
+    fn session_user_without_access_token_decodes_with_none() {
+        let json =
+            r#"{"sub":"s","name":"N","email":null,"roles":[],"expiry":"2999-01-01T00:00:00Z"}"#;
+        let user: SessionUser = serde_json::from_str(json).unwrap();
+        assert!(user.access_token.is_none());
+    }
 
     #[tokio::test]
     async fn disabled_client_returns_no_user_without_making_a_request() {

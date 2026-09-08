@@ -1,0 +1,26 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: sweetrpg-game-systems
+
+resources:
+    - ../../base
+    - configmaps.yaml
+    - secrets.yaml
+    - podmonitor.yaml
+    - ingress.yaml
+    - middlewares.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: game-systems-web
+      app.kubernetes.io/version: v1
+      app.kubernetes.io/component: web
+      app.kubernetes.io/part-of: game-systems
+      com.sweetrpg/env: local
+    includeSelectors: false
+    includeTemplates: true
+
+generatorOptions:
+    disableNameSuffixHash: true
