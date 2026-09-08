@@ -1,4 +1,15 @@
 
+## 0.2.0 - 2026-09-08
+
+### Added
+- Adopt shared-web design system (nav, avatar menu, footer, class vocab)
+
+
+### Fixed
+- Build detail/version links from record_id
+
+
+
 ## 0.1.3 - 2026-09-08
 
 ### Fixed
