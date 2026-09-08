@@ -1,4 +1,11 @@
 
+## 0.1.3 - 2026-09-08
+
+### Fixed
+- Accept bare-array /systems response, fix sign-in redirect target
+
+
+
 ## 0.1.2 - 2026-09-08
 
 ### Fixed
