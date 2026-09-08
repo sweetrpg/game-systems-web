@@ -21,7 +21,7 @@ data:
     # NB: REDIS_DB=1 is reserved for *this service's own* future cache instance in
     # sweetrpg-game-systems (game-systems-api would take 0) - it is not the shared-session DB.
     # game-systems-web has no local cache today. See docs/frontend-conventions.md.
-    SHARED_SESSION_REDIS_HOST: redis.sweetrpg-auth.svc.cluster.local
+    SHARED_SESSION_REDIS_HOST: cache.sweetrpg-auth.svc.cluster.local
     SHARED_SESSION_REDIS_PORT: "6379"
     SHARED_SESSION_REDIS_DB: "0"
     # Same collector the other frontends export to (tempo-distributor's OTLP/HTTP receiver).

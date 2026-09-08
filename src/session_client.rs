@@ -21,13 +21,15 @@ pub struct SessionUser {
     pub name: String,
     pub email: Option<String>,
     pub roles: Vec<String>,
-    /// Bearer access token for the signed-in principal, written into the shared session by
-    /// `auth-web`. `game-systems-web` forwards this on `POST /systems` so `game-systems-api`'s
-    /// `authz` middleware can run the authoritative `RequireAnyRole` check (design.md,
-    /// decision 3). `None` on a session written before `auth-web` began carrying it - the
-    /// add-new form's write path treats that as unable to authenticate and does not call the
-    /// API. Not used by `main-web`, whose copy of this struct simply ignores the extra field.
-    #[serde(default)]
+    /// The Auth0 access token from the code exchange, written into the shared session by
+    /// `auth-web` (its `SessionUser.accessToken`, JSON key `accessToken`). `game-systems-web`
+    /// forwards it as a Bearer token on `POST /systems` so `game-systems-api`'s `authz`
+    /// middleware runs the authoritative `RequireAnyRole` check - the same thing `catalog-web`
+    /// forwards to `catalog-api` for volume submission. `auth-web` has written this on every
+    /// session since the volume-edit-with-approval-workflow change; `Option` + `default` only
+    /// covers a session encoded before then. `main-web`'s copy of this struct omits the field
+    /// and simply ignores it on the wire.
+    #[serde(rename = "accessToken", default)]
     pub access_token: Option<String>,
     /// When this session becomes invalid, set by `auth-web` at write time. A session at or
     /// past this timestamp must be treated as absent, not stale data - see
@@ -172,7 +174,7 @@ mod tests {
         "name": "Ada Lovelace",
         "email": "ada@example.com",
         "roles": ["submitter", "viewer"],
-        "access_token": "tok-xyz",
+        "accessToken": "tok-xyz",
         "expiry": "2999-01-01T00:00:00Z"
     }"#;
 
