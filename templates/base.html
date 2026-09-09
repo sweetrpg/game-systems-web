@@ -47,6 +47,9 @@
         <div class="avatar-menu">
             <button type="button" class="avatar-menu-trigger">
                 {% if chrome.is_authed %}
+                {% if !chrome.gravatar_url.is_empty() %}
+                <img class="avatar-menu-avatar" src="{{ chrome.gravatar_url }}" alt="" loading="lazy" onload="this.nextElementSibling.style.display='none'" onerror="this.style.display='none'">
+                {% endif %}
                 <span class="avatar-menu-fallback">{{ chrome.avatar_initial }}</span>
                 {% else %}
                 <img class="avatar-menu-avatar" src="{{ chrome.shared_url }}/static/img/mystery-man.svg" alt="">

@@ -1,4 +1,11 @@
 
+## 0.4.0 - 2026-09-09
+
+### Added
+- Render the user's Gravatar in the avatar menu
+
+
+
 ## 0.3.0 - 2026-09-08
 
 ### Added
