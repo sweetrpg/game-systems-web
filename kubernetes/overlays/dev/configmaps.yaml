@@ -13,6 +13,11 @@ data:
     # is called at its bare unprefixed routes. Pinned to api-v1 deliberately (not the api-v0
     # latest-alias) per docs/deployment-conventions.md.
     GAME_SYSTEMS_API_URL: http://api-v1.sweetrpg-game-systems.svc.cluster.local:8000
+    # Read-only, fail-open: backs the publisher name picker on the add-new form (catalog-api
+    # owns publisher data). Cross-namespace to sweetrpg-catalog, pinned to api-v1 per
+    # docs/deployment-conventions.md - the same target every other frontend's CATALOG_API_URL
+    # uses. Unset would just disable suggestions. See docs/adr/0001-publisher-lookup-via-catalog-api.md.
+    CATALOG_API_URL: http://api-v1.sweetrpg-catalog.svc.cluster.local:8000
     # auth-web's own dedicated Redis in sweetrpg-auth - this app only ever reads the shared
     # session auth-web writes. Host/DB must match auth-web's own REDIS_HOST/REDIS_DB exactly; a
     # mismatch fails open ("every visitor logged-out"), silently, with no startup error. DB 0

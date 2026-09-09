@@ -41,12 +41,18 @@ versions:
   col_version: Version
   col_state: State
 new:
-  title: Propose a game system
+  # Editors and admins add a system directly; submitters propose one for review. The route
+  # layer picks the pair by role.
+  title: Add a game system
+  title_propose: Propose a game system
   field_system_id: System ID
   field_name: Name
   field_edition: Edition
-  field_publisher: Publisher ID
+  field_publisher: Publisher
   field_notes: Notes
   field_tags: Tags (comma-separated)
-  submit: Submit for review
+  submit: Add system
+  submit_propose: Submit for review
   not_authorized: You do not have permission to add a game system.
+  publisher_not_found: No publisher matches that name.
+  publisher_ambiguous: More than one publisher matches that name - pick one from the list.

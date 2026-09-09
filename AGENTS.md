@@ -43,6 +43,16 @@ it targets `api-v1.sweetrpg-game-systems.svc.cluster.local` via `GAME_SYSTEMS_AP
 calls bypass the ingress, so no `/api/0` vs `/api/1` version prefix applies. Any upstream
 failure or timeout renders the shared 502/503 error page rather than an unhandled exception.
 
+### Upstream: `catalog-api` (publisher picker only)
+
+`CatalogClient` (`src/catalog_client.rs`) calls `catalog-api` `GET /publishers/search?q=`
+read-only to back the publisher name picker on the add-new form (`catalog-api` owns publisher
+data). Gated on `CATALOG_API_URL`; in-cluster it targets
+`api-v1.sweetrpg-catalog.svc.cluster.local`, cross-namespace, pinned to `api-v1` per
+`docs/deployment-conventions.md`. Fail-open: an unset var, timeout, non-2xx, or bad body yields
+no suggestions rather than an error, and the typed name is resolved to an id server-side on
+submit. See `docs/adr/0001-publisher-lookup-via-catalog-api.md`.
+
 ### Session and role gating
 
 `SessionClient` (`src/session_client.rs`, copied from `main-web`) reads the suite session from

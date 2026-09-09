@@ -6,10 +6,12 @@ use axum::http::{HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::get;
 use axum::Form;
+use axum::Json;
 use axum::Router;
 use axum_extra::extract::CookieJar;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
+use crate::catalog_client::Publisher;
 use crate::game_systems_client::{ClientError, GameSystemView, ListQuery, NewSystem, Tag};
 use crate::i18n::Tr;
 use crate::session_client::{SessionUser, SESSION_COOKIE_NAME};
@@ -19,6 +21,10 @@ use crate::AppState;
 /// `editCapableRoles` and `game-systems-api`'s `RequireAnyRole(Admin, Editor, Submitter)` on
 /// `POST /systems` - UI gating only, the API is the authoritative gate.
 const WRITE_ROLES: &[&str] = &["submitter", "editor", "admin"];
+
+/// Write roles that add a system directly. A caller with a write role but none of these is a
+/// plain submitter, who gets the "propose for review" framing instead.
+const DIRECT_WRITE_ROLES: &[&str] = &["editor", "admin"];
 
 /// Allowed `sort` values, forwarded verbatim to `game-systems-api` (which applies its own
 /// allowlist). Anything else is dropped so the query string can't carry an arbitrary value.
@@ -96,7 +102,15 @@ impl Chrome {
             logout_url: logout_url(return_to),
             version: state.build_info.version.clone(),
             build_timestamp: state.build_info.date.clone(),
-            build_hash: state.build_info.sha.clone(),
+            // Pre-truncate to a short hash here rather than slicing in the template: a real
+            // commit SHA can exceed 8 chars, and Askama's `[..8]` panics on a shorter string.
+            // Matches `main-web`.
+            build_hash: state
+                .build_info
+                .sha
+                .get(..8)
+                .unwrap_or(&state.build_info.sha)
+                .to_string(),
             tr,
         }
     }
@@ -110,6 +124,7 @@ pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(browse))
         .route("/new", get(new_form).post(submit_new))
+        .route("/new/publishers", get(publisher_search))
         .route("/{id}", get(detail))
         .route("/{id}/versions", get(version_history))
 }
@@ -130,6 +145,14 @@ async fn current_user(state: &AppState, jar: &CookieJar) -> Option<SessionUser> 
 
 fn has_write_role(user: &SessionUser) -> bool {
     user.roles.iter().any(|r| WRITE_ROLES.contains(&r.as_str()))
+}
+
+/// True for editors and admins, who add systems directly. A plain submitter is `false` and
+/// sees the "propose for review" wording.
+fn is_direct_writer(user: &SessionUser) -> bool {
+    user.roles
+        .iter()
+        .any(|r| DIRECT_WRITE_ROLES.contains(&r.as_str()))
 }
 
 /// The id to address a system by in a detail/version link. `game-systems-api`'s
@@ -427,6 +450,10 @@ async fn browse(
 #[template(path = "new.html")]
 struct NewTemplate {
     chrome: Chrome,
+    /// Heading and submit-button text, resolved by role: "Add a game system" / "Add system"
+    /// for editors and admins, the propose-for-review pair for submitters.
+    page_title: String,
+    submit_label: String,
     error: Option<String>,
     form: NewFormValues,
 }
@@ -436,6 +463,10 @@ struct NewFormValues {
     system_id: String,
     name: String,
     edition: String,
+    /// What the user typed in the publisher field (a name). Shown on re-render.
+    publisher_name: String,
+    /// The resolved publisher id - set by the picker's JS, or left blank for the server to
+    /// resolve from `publisher_name` on submit.
     publisher_id: String,
     notes: String,
     tags: String,
@@ -449,6 +480,8 @@ struct NewFormSubmission {
     name: String,
     #[serde(default)]
     edition: String,
+    #[serde(default)]
+    publisher_name: String,
     #[serde(default)]
     publisher_id: String,
     #[serde(default)]
@@ -464,10 +497,41 @@ impl From<&NewFormSubmission> for NewFormValues {
             system_id: s.system_id.clone(),
             name: s.name.clone(),
             edition: s.edition.clone(),
+            publisher_name: s.publisher_name.clone(),
             publisher_id: s.publisher_id.clone(),
             notes: s.notes.clone(),
             tags: s.tags.clone(),
         }
+    }
+}
+
+/// Why a typed publisher name couldn't be resolved to a single id.
+#[derive(Debug)]
+enum NameResolveError {
+    NotFound,
+    Ambiguous,
+}
+
+/// Resolves a typed publisher name to a catalog-api publisher id, given what
+/// `search_publishers` returned for it. `picker_enabled` is false when `CATALOG_API_URL` is
+/// unset: with no source of truth, an unmatched name is accepted as blank rather than rejected.
+fn resolve_named_publisher(
+    name: &str,
+    matches: &[Publisher],
+    picker_enabled: bool,
+) -> Result<String, NameResolveError> {
+    let needle = name.trim().to_lowercase();
+    let mut exact = matches
+        .iter()
+        .filter(|p| p.name.trim().to_lowercase() == needle);
+    match (exact.next(), exact.next()) {
+        (Some(p), None) => Ok(p.id.clone()),
+        (Some(_), Some(_)) => Err(NameResolveError::Ambiguous),
+        // Picker enabled but nothing matched: a genuine "no such publisher". A transient
+        // catalog-api failure also lands here (empty `matches`); re-submitting recovers.
+        (None, _) if picker_enabled => Err(NameResolveError::NotFound),
+        // Picker disabled - accept the name as-is with no id.
+        (None, _) => Ok(String::new()),
     }
 }
 
@@ -489,8 +553,15 @@ fn new_page(
     error: Option<String>,
     form: NewFormValues,
 ) -> Response {
+    let (page_title, submit_label) = if is_direct_writer(user) {
+        (tr.new_title(), tr.new_submit())
+    } else {
+        (tr.new_title_propose(), tr.new_submit_propose())
+    };
     render(NewTemplate {
         chrome: Chrome::new(state, tr, Some(user), &format!("{BASE_PATH}/new")),
+        page_title,
+        submit_label,
         error,
         form,
     })
@@ -509,6 +580,48 @@ async fn new_form(
         return (StatusCode::FORBIDDEN, Html(tr.new_not_authorized())).into_response();
     }
     new_page(&state, tr, &user, None, NewFormValues::default())
+}
+
+#[derive(Debug, Default, Deserialize)]
+struct PublisherSearchParams {
+    #[serde(default)]
+    q: String,
+}
+
+/// One publisher suggestion for the add-form's name picker.
+#[derive(Serialize)]
+struct PublisherOption {
+    id: String,
+    name: String,
+}
+
+/// `GET /game-systems/new/publishers?q=` - JSON publisher suggestions for the add-form picker.
+/// Same session + write-role gate as the form itself. Returns `[]` when the query is too short,
+/// the picker is disabled (`CATALOG_API_URL` unset), or catalog-api is unreachable.
+async fn publisher_search(
+    State(state): State<Arc<AppState>>,
+    jar: CookieJar,
+    headers: HeaderMap,
+    Query(params): Query<PublisherSearchParams>,
+) -> Response {
+    let tr = tr_for(&jar, &headers);
+    let Some(user) = current_user(&state, &jar).await else {
+        return Redirect::to(&login_url(&format!("{BASE_PATH}/new"))).into_response();
+    };
+    if !has_write_role(&user) {
+        return (StatusCode::FORBIDDEN, Html(tr.new_not_authorized())).into_response();
+    }
+    let options: Vec<PublisherOption> = state
+        .catalog
+        .search_publishers(&params.q)
+        .await
+        .into_iter()
+        .map(|p| PublisherOption {
+            id: p.id,
+            name: p.name,
+        })
+        .collect();
+    Json(options).into_response()
 }
 
 async fn submit_new(
@@ -537,11 +650,46 @@ async fn submit_new(
         );
     };
 
+    // The hidden field (a JS-picked id) wins. Otherwise resolve the typed name against
+    // catalog-api; a disabled picker or an outage leaves the publisher blank rather than
+    // blocking the submission.
+    let picked_id = submission.publisher_id.trim().to_string();
+    let publisher_id = if !picked_id.is_empty() {
+        picked_id
+    } else if submission.publisher_name.trim().is_empty() {
+        String::new()
+    } else {
+        let matches = state
+            .catalog
+            .search_publishers(&submission.publisher_name)
+            .await;
+        match resolve_named_publisher(
+            &submission.publisher_name,
+            &matches,
+            state.config.catalog_api_url.is_some(),
+        ) {
+            Ok(id) => id,
+            Err(reason) => {
+                let message = match reason {
+                    NameResolveError::NotFound => tr.new_publisher_not_found(),
+                    NameResolveError::Ambiguous => tr.new_publisher_ambiguous(),
+                };
+                return new_page(
+                    &state,
+                    tr.clone(),
+                    &user,
+                    Some(message),
+                    NewFormValues::from(&submission),
+                );
+            }
+        }
+    };
+
     let body = NewSystem {
         system_id: submission.system_id.trim().to_string(),
         name: submission.name.trim().to_string(),
         edition: submission.edition.trim().to_string(),
-        publisher_id: submission.publisher_id.trim().to_string(),
+        publisher_id,
         notes: submission.notes.trim().to_string(),
         tags: parse_tags(&submission.tags),
     };
@@ -588,6 +736,14 @@ mod tests {
     }
 
     #[test]
+    fn direct_writer_is_editor_or_admin_but_not_plain_submitter() {
+        assert!(is_direct_writer(&user_with_roles(&["admin"])));
+        assert!(is_direct_writer(&user_with_roles(&["editor"])));
+        assert!(!is_direct_writer(&user_with_roles(&["submitter"])));
+        assert!(!is_direct_writer(&user_with_roles(&["viewer"])));
+    }
+
+    #[test]
     fn disallowed_sort_is_dropped() {
         let params = BrowseParams {
             sort: Some("notes".into()),
@@ -630,6 +786,49 @@ mod tests {
         assert!(a.contains("d=404"));
     }
 
+    fn publisher(id: &str, name: &str) -> Publisher {
+        Publisher {
+            id: id.to_string(),
+            name: name.to_string(),
+        }
+    }
+
+    #[test]
+    fn resolve_named_publisher_returns_id_on_unique_case_insensitive_match() {
+        let matches = [
+            publisher("p1", "Wizards of the Coast"),
+            publisher("p2", "Paizo"),
+        ];
+        let id = resolve_named_publisher("  wizards of the COAST ", &matches, true).unwrap();
+        assert_eq!(id, "p1");
+    }
+
+    #[test]
+    fn resolve_named_publisher_ambiguous_on_two_exact_matches() {
+        let matches = [publisher("p1", "Chaosium"), publisher("p2", "chaosium")];
+        assert!(matches!(
+            resolve_named_publisher("chaosium", &matches, true),
+            Err(NameResolveError::Ambiguous)
+        ));
+    }
+
+    #[test]
+    fn resolve_named_publisher_not_found_when_picker_enabled_and_no_match() {
+        let matches = [publisher("p1", "Wizards of the Coast")];
+        assert!(matches!(
+            resolve_named_publisher("Nobody", &matches, true),
+            Err(NameResolveError::NotFound)
+        ));
+    }
+
+    #[test]
+    fn resolve_named_publisher_blank_when_picker_disabled() {
+        assert_eq!(
+            resolve_named_publisher("Anything", &[], false).unwrap(),
+            String::new()
+        );
+    }
+
     // The Ingress strips /game-systems, so the app must serve its pages at the root. A
     // regression here 404s every page in dev while /status/ping still answers (see
     // sweetrpg/game-systems-web v0.1.2).
@@ -642,6 +841,7 @@ mod tests {
             api: crate::game_systems_client::GameSystemsApiClient::new(
                 "http://127.0.0.1:1".to_string(),
             ),
+            catalog: crate::catalog_client::CatalogClient::new(None),
         });
         router()
             .with_state(state)
@@ -695,5 +895,18 @@ mod tests {
             route_status("/game-systems/new").await,
             axum::http::StatusCode::NOT_FOUND
         );
+    }
+
+    #[tokio::test]
+    async fn publisher_search_is_gated_like_the_add_form() {
+        // No session -> redirect to sign-in, same as GET /new. Route matched (not a 404).
+        let resp = route_response("/new/publishers?q=wiz").await;
+        assert_eq!(resp.status(), axum::http::StatusCode::SEE_OTHER);
+        let location = resp
+            .headers()
+            .get(axum::http::header::LOCATION)
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or_default();
+        assert!(location.starts_with("/auth/login?return_to="));
     }
 }

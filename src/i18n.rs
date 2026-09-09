@@ -162,6 +162,9 @@ impl Tr {
     pub fn new_title(&self) -> String {
         self.s("new.title")
     }
+    pub fn new_title_propose(&self) -> String {
+        self.s("new.title_propose")
+    }
     pub fn new_field_system_id(&self) -> String {
         self.s("new.field_system_id")
     }
@@ -183,8 +186,17 @@ impl Tr {
     pub fn new_submit(&self) -> String {
         self.s("new.submit")
     }
+    pub fn new_submit_propose(&self) -> String {
+        self.s("new.submit_propose")
+    }
     pub fn new_not_authorized(&self) -> String {
         self.s("new.not_authorized")
+    }
+    pub fn new_publisher_not_found(&self) -> String {
+        self.s("new.publisher_not_found")
+    }
+    pub fn new_publisher_ambiguous(&self) -> String {
+        self.s("new.publisher_ambiguous")
     }
 }
 
