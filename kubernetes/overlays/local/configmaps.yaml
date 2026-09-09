@@ -10,6 +10,10 @@ data:
     BUILD_INFO_PATH: /app/config/build-info.json
     LOG_LEVEL: info
     GAME_SYSTEMS_API_URL: http://api-v1.sweetrpg-game-systems.svc.cluster.local:8000
+    # Read-only, fail-open: backs the publisher name picker on the add-new form. Cross-namespace
+    # to sweetrpg-catalog, pinned to api-v1 per docs/deployment-conventions.md. Unset just
+    # disables suggestions. See docs/adr/0001-publisher-lookup-via-catalog-api.md.
+    CATALOG_API_URL: http://api-v1.sweetrpg-catalog.svc.cluster.local:8000
     # auth-web's own dedicated Redis - this app only reads the shared session. DB 0 matches
     # main-web's config against the same instance. REDIS_DB=1 is reserved for this service's
     # own future cache, not the shared session (see docs/frontend-conventions.md).

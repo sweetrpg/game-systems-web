@@ -9,6 +9,12 @@ pub struct Config {
     /// `http://api-v1.sweetrpg-game-systems.svc.cluster.local:8000`; unset falls back to a
     /// local instance. Internal calls bypass the ingress, so no `/api/N` version prefix.
     pub game_systems_api_url: String,
+    /// Base URL for `catalog-api`, which owns publisher data. Read-only and fail-open: unset
+    /// disables the publisher name picker on the add-new form (the field degrades to plain
+    /// text). In-cluster this points cross-namespace at `sweetrpg-catalog`, pinned to `api-v1`
+    /// per `docs/deployment-conventions.md` - the same target every other frontend's
+    /// `CATALOG_API_URL` uses. See `docs/adr/0001-publisher-lookup-via-catalog-api.md`.
+    pub catalog_api_url: Option<String>,
     pub otlp_endpoint: Option<String>,
     pub log_level: String,
     /// Host of the shared session Redis instance `auth-web` owns - this app only ever reads it,
@@ -38,6 +44,7 @@ impl Config {
                 .unwrap_or_else(|_| "http://localhost:8081".to_string()),
             game_systems_api_url: env::var("GAME_SYSTEMS_API_URL")
                 .unwrap_or_else(|_| "http://localhost:8000".to_string()),
+            catalog_api_url: env::var("CATALOG_API_URL").ok().filter(|v| !v.is_empty()),
             otlp_endpoint: env::var("OTEL_EXPORTER_OTLP_ENDPOINT").ok(),
             log_level: env::var("LOG_LEVEL").unwrap_or_else(|_| "info".to_string()),
             shared_session_redis_host: env::var("SHARED_SESSION_REDIS_HOST")
