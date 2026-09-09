@@ -11,6 +11,7 @@ axum = "0.8"
 axum-extra = { version = "0.12", features = ["cookie"] }
 axum-prometheus = "0.10"
 chrono = { version = "0.4", default-features = false, features = ["serde", "std", "clock"] }
+md5 = "0.8"
 opentelemetry = "0.32"
 opentelemetry-otlp = { version = "0.32", default-features = false, features = ["http-proto", "reqwest-client"] }
 opentelemetry_sdk = { version = "0.32", features = ["rt-tokio"] }

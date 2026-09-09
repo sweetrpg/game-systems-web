@@ -49,6 +49,10 @@ struct Chrome {
     base_path: &'static str,
     is_authed: bool,
     avatar_initial: String,
+    /// Gravatar URL from the session email, or empty. `d=404` so a visitor with no Gravatar
+    /// gets a real 404 and the template's `onerror` falls back to `avatar_initial` - same as
+    /// `main-web`.
+    gravatar_url: String,
     user_name: String,
     user_email: String,
     is_admin: bool,
@@ -58,6 +62,16 @@ struct Chrome {
     build_timestamp: String,
     build_hash: String,
     tr: Tr,
+}
+
+/// Gravatar image URL from a session email, or `None` if no email. `d=404` makes Gravatar
+/// return a real 404 for an email with no registered image (not its generic placeholder) so
+/// the template's `onerror` handler can fall back to the initial-letter circle. Mirrors
+/// `main-web`'s `gravatar_url`.
+fn gravatar_url(email: Option<&str>) -> Option<String> {
+    let email = email?;
+    let hash = format!("{:x}", md5::compute(email.trim().to_lowercase().as_bytes()));
+    Some(format!("https://www.gravatar.com/avatar/{hash}?s=64&d=404"))
 }
 
 impl Chrome {
@@ -71,6 +85,9 @@ impl Chrome {
             avatar_initial: user
                 .and_then(|u| u.name.chars().next())
                 .map(|c| c.to_uppercase().to_string())
+                .unwrap_or_default(),
+            gravatar_url: user
+                .and_then(|u| gravatar_url(u.email.as_deref()))
                 .unwrap_or_default(),
             user_name: user.map(|u| u.name.clone()).unwrap_or_default(),
             user_email: user.and_then(|u| u.email.clone()).unwrap_or_default(),
@@ -597,6 +614,20 @@ mod tests {
         assert_eq!(tags.len(), 2);
         assert_eq!(tags[0].name, "fantasy");
         assert_eq!(tags[1].name, "d20");
+    }
+
+    #[test]
+    fn gravatar_url_none_without_an_email() {
+        assert!(gravatar_url(None).is_none());
+    }
+
+    #[test]
+    fn gravatar_url_hashes_a_trimmed_lowercased_email_with_a_404_fallback() {
+        let a = gravatar_url(Some(" Ada@Example.com ")).unwrap();
+        let b = gravatar_url(Some("ada@example.com")).unwrap();
+        assert_eq!(a, b);
+        assert!(a.starts_with("https://www.gravatar.com/avatar/"));
+        assert!(a.contains("d=404"));
     }
 
     // The Ingress strips /game-systems, so the app must serve its pages at the root. A
