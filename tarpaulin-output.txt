@@ -1,14 +1,18 @@
-[2m2026-09-09T00:17:47.627594Z[0m [32m INFO[0m [2mcargo_tarpaulin::config[0m[2m:[0m Creating config
-[2m2026-09-09T00:17:48.528450Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Running Tarpaulin
-[2m2026-09-09T00:17:48.528465Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Building project
-[2m2026-09-09T00:17:48.541814Z[0m [32m INFO[0m [2mcargo_tarpaulin::cargo[0m[2m:[0m Cleaning project
-[2m2026-09-09T00:19:21.832715Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m running /home/runner/work/game-systems-web/game-systems-web/target/debug/deps/sweetrpg_game_systems_web-bce0d0039b554c45
-[2m2026-09-09T00:19:21.832817Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m Setting LLVM_PROFILE_FILE
+[2m2026-09-09T05:49:05.133708Z[0m [32m INFO[0m [2mcargo_tarpaulin::config[0m[2m:[0m Creating config
+[2m2026-09-09T05:49:06.026094Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Running Tarpaulin
+[2m2026-09-09T05:49:06.026108Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Building project
+[2m2026-09-09T05:49:06.040980Z[0m [32m INFO[0m [2mcargo_tarpaulin::cargo[0m[2m:[0m Cleaning project
+[2m2026-09-09T05:50:38.514981Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m running /home/runner/work/game-systems-web/game-systems-web/target/debug/deps/sweetrpg_game_systems_web-bce0d0039b554c45
+[2m2026-09-09T05:50:38.515087Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m Setting LLVM_PROFILE_FILE
 
-running 29 tests
+running 39 tests
 test build_info::tests::leaves_bare_version_unchanged ... ok
 test build_info::tests::leaves_dev_placeholder_unchanged ... ok
 test build_info::tests::strips_leading_v_from_tag_version ... ok
+test catalog_client::tests::decodes_the_jsonapi_search_envelope ... ok
+test catalog_client::tests::disabled_client_yields_empty ... ok
+test catalog_client::tests::non_success_yields_empty ... ok
+test catalog_client::tests::short_query_makes_no_request ... ok
 test game_systems_client::tests::create_maps_400_to_bad_request_with_message ... ok
 test game_systems_client::tests::create_maps_403_to_forbidden ... ok
 test game_systems_client::tests::get_maps_404_to_not_found ... ok
@@ -20,6 +24,7 @@ test i18n::tests::english_translator_resolves_a_known_key ... ok
 test i18n::tests::missing_everything_falls_back_to_english ... ok
 test i18n::tests::unsupported_accept_language_and_no_cookie_falls_back_to_english ... ok
 test i18n::tests::unsupported_cookie_falls_through_to_accept_language ... ok
+test routes::systems::tests::direct_writer_is_editor_or_admin_but_not_plain_submitter ... ok
 test routes::systems::tests::disallowed_sort_is_dropped ... ok
 test routes::systems::tests::gravatar_url_hashes_a_trimmed_lowercased_email_with_a_404_fallback ... ok
 test routes::systems::tests::gravatar_url_none_without_an_email ... ok
@@ -27,6 +32,11 @@ test routes::systems::tests::no_write_role_for_plain_viewer ... ok
 test routes::systems::tests::page_url_carries_search_and_sort ... ok
 test routes::systems::tests::pages_are_served_at_the_root_not_under_game_systems ... ok
 test routes::systems::tests::parse_tags_splits_and_trims ... ok
+test routes::systems::tests::publisher_search_is_gated_like_the_add_form ... ok
+test routes::systems::tests::resolve_named_publisher_ambiguous_on_two_exact_matches ... ok
+test routes::systems::tests::resolve_named_publisher_blank_when_picker_disabled ... ok
+test routes::systems::tests::resolve_named_publisher_not_found_when_picker_enabled_and_no_match ... ok
+test routes::systems::tests::resolve_named_publisher_returns_id_on_unique_case_insensitive_match ... ok
 test routes::systems::tests::write_role_detected_for_submitter ... ok
 test session_client::tests::a_session_at_or_after_expiry_is_inactive ... ok
 test session_client::tests::decodes_a_sample_shared_session_user ... ok
@@ -36,23 +46,24 @@ test session_client::tests::session_user_without_access_token_decodes_with_none 
 test session_client::tests::unreachable_redis_fails_open ... ok
 test session_client::tests::unreachable_redis_fails_open_with_a_password_configured ... ok
 
-test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 37.82s
+test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 37.82s
 
-[2m2026-09-09T00:19:59.658655Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m For binary: target/debug/deps/sweetrpg_game_systems_web-bce0d0039b554c45
-[2m2026-09-09T00:19:59.658671Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Generated: target/tarpaulin/profraws/sweetrpg_game_systems_web-bce0d0039b554c45_7206664191078808264_0-16678.profraw
-[2m2026-09-09T00:19:59.658674Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Merging coverage reports
-[2m2026-09-09T00:19:59.815453Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Mapping coverage data to source
-[2m2026-09-09T00:20:00.445896Z[0m [32m INFO[0m [2mcargo_tarpaulin::report[0m[2m:[0m Coverage Results:
-[2m2026-09-09T00:20:00.446814Z[0m [32m INFO[0m [2mcargo_tarpaulin::report::html[0m[2m:[0m HTML report written to /home/runner/work/game-systems-web/game-systems-web/coverage/tarpaulin-report.html
+[2m2026-09-09T05:51:16.344294Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m For binary: target/debug/deps/sweetrpg_game_systems_web-bce0d0039b554c45
+[2m2026-09-09T05:51:16.344308Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Generated: target/tarpaulin/profraws/sweetrpg_game_systems_web-bce0d0039b554c45_7210817523476314824_0-16686.profraw
+[2m2026-09-09T05:51:16.344311Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Merging coverage reports
+[2m2026-09-09T05:51:16.498154Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Mapping coverage data to source
+[2m2026-09-09T05:51:17.132925Z[0m [32m INFO[0m [2mcargo_tarpaulin::report[0m[2m:[0m Coverage Results:
+[2m2026-09-09T05:51:17.133919Z[0m [32m INFO[0m [2mcargo_tarpaulin::report::html[0m[2m:[0m HTML report written to /home/runner/work/game-systems-web/game-systems-web/coverage/tarpaulin-report.html
 || Tested/Total Lines:
 || src/build_info.rs: 23/23
-|| src/config.rs: 12/12
+|| src/catalog_client.rs: 27/33
+|| src/config.rs: 13/13
 || src/game_systems_client.rs: 61/77
-|| src/i18n.rs: 19/103
-|| src/main.rs: 0/40
+|| src/i18n.rs: 19/111
+|| src/main.rs: 0/42
 || src/routes/health.rs: 0/6
-|| src/routes/systems.rs: 77/209
+|| src/routes/systems.rs: 94/265
 || src/session_client.rs: 23/51
 || src/telemetry.rs: 0/27
 || 
-39.23% coverage, 215/548 lines covered
+40.12% coverage, 260/648 lines covered
