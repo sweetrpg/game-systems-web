@@ -1,4 +1,15 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
+
+/// Deserialize a field that `game-systems-api` may send as JSON `null` (a nil Go slice
+/// serializes to `null`, not `[]`) into `T::default()`. `#[serde(default)]` alone only covers a
+/// missing key, so an explicit `null` in one row would otherwise fail the whole response decode.
+fn null_to_default<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Default + Deserialize<'de>,
+{
+    Ok(Option::<T>::deserialize(deserializer)?.unwrap_or_default())
+}
 
 /// One tag on a game system, mirroring `model-core.go`'s `Tag`.
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
@@ -27,7 +38,7 @@ pub struct GameSystemView {
     pub publisher_id: String,
     #[serde(default)]
     pub notes: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_to_default")]
     pub tags: Vec<Tag>,
 }
 
@@ -328,6 +339,25 @@ mod tests {
         assert_eq!(page.total, 2);
         assert_eq!(page.page, 1);
         assert_eq!(page.systems[1].name, "Star Frontier");
+    }
+
+    #[tokio::test]
+    async fn list_tolerates_null_tags_from_the_api() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/systems"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {"id": "gs1", "name": "Kromore", "edition": "1", "tags": null},
+                {"id": "gs2", "name": "Star Frontier", "edition": "2e", "tags": [{"name": "genre", "value": "scifi"}]}
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = GameSystemsApiClient::new(server.uri());
+        let page = client.list(&ListQuery::default()).await.unwrap();
+        assert_eq!(page.systems.len(), 2);
+        assert!(page.systems[0].tags.is_empty());
+        assert_eq!(page.systems[1].tags[0].value, "scifi");
     }
 
     #[tokio::test]
