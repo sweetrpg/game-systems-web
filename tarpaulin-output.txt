@@ -1,11 +1,11 @@
-[2m2026-09-09T05:49:05.133708Z[0m [32m INFO[0m [2mcargo_tarpaulin::config[0m[2m:[0m Creating config
-[2m2026-09-09T05:49:06.026094Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Running Tarpaulin
-[2m2026-09-09T05:49:06.026108Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Building project
-[2m2026-09-09T05:49:06.040980Z[0m [32m INFO[0m [2mcargo_tarpaulin::cargo[0m[2m:[0m Cleaning project
-[2m2026-09-09T05:50:38.514981Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m running /home/runner/work/game-systems-web/game-systems-web/target/debug/deps/sweetrpg_game_systems_web-bce0d0039b554c45
-[2m2026-09-09T05:50:38.515087Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m Setting LLVM_PROFILE_FILE
+[2m2026-09-10T04:47:50.018113Z[0m [32m INFO[0m [2mcargo_tarpaulin::config[0m[2m:[0m Creating config
+[2m2026-09-10T04:47:50.892522Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Running Tarpaulin
+[2m2026-09-10T04:47:50.892536Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Building project
+[2m2026-09-10T04:47:50.904970Z[0m [32m INFO[0m [2mcargo_tarpaulin::cargo[0m[2m:[0m Cleaning project
+[2m2026-09-10T04:49:28.989662Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m running /home/runner/work/game-systems-web/game-systems-web/target/debug/deps/sweetrpg_game_systems_web-bce0d0039b554c45
+[2m2026-09-10T04:49:28.989770Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m Setting LLVM_PROFILE_FILE
 
-running 39 tests
+running 40 tests
 test build_info::tests::leaves_bare_version_unchanged ... ok
 test build_info::tests::leaves_dev_placeholder_unchanged ... ok
 test build_info::tests::strips_leading_v_from_tag_version ... ok
@@ -18,6 +18,7 @@ test game_systems_client::tests::create_maps_403_to_forbidden ... ok
 test game_systems_client::tests::get_maps_404_to_not_found ... ok
 test game_systems_client::tests::list_decodes_a_bare_array_from_the_pre_pagination_api ... ok
 test game_systems_client::tests::list_decodes_the_paginated_envelope ... ok
+test game_systems_client::tests::list_tolerates_null_tags_from_the_api ... ok
 test i18n::tests::accept_language_region_tag_matches_base_locale ... ok
 test i18n::tests::cookie_override_wins_over_accept_language ... ok
 test i18n::tests::english_translator_resolves_a_known_key ... ok
@@ -46,19 +47,19 @@ test session_client::tests::session_user_without_access_token_decodes_with_none 
 test session_client::tests::unreachable_redis_fails_open ... ok
 test session_client::tests::unreachable_redis_fails_open_with_a_password_configured ... ok
 
-test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 37.82s
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 37.83s
 
-[2m2026-09-09T05:51:16.344294Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m For binary: target/debug/deps/sweetrpg_game_systems_web-bce0d0039b554c45
-[2m2026-09-09T05:51:16.344308Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Generated: target/tarpaulin/profraws/sweetrpg_game_systems_web-bce0d0039b554c45_7210817523476314824_0-16686.profraw
-[2m2026-09-09T05:51:16.344311Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Merging coverage reports
-[2m2026-09-09T05:51:16.498154Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Mapping coverage data to source
-[2m2026-09-09T05:51:17.132925Z[0m [32m INFO[0m [2mcargo_tarpaulin::report[0m[2m:[0m Coverage Results:
-[2m2026-09-09T05:51:17.133919Z[0m [32m INFO[0m [2mcargo_tarpaulin::report::html[0m[2m:[0m HTML report written to /home/runner/work/game-systems-web/game-systems-web/coverage/tarpaulin-report.html
+[2m2026-09-10T04:50:06.820724Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m For binary: target/debug/deps/sweetrpg_game_systems_web-bce0d0039b554c45
+[2m2026-09-10T04:50:06.820740Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Generated: target/tarpaulin/profraws/sweetrpg_game_systems_web-bce0d0039b554c45_7210629522028739272_0-16576.profraw
+[2m2026-09-10T04:50:06.820744Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Merging coverage reports
+[2m2026-09-10T04:50:06.962743Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Mapping coverage data to source
+[2m2026-09-10T04:50:07.553484Z[0m [32m INFO[0m [2mcargo_tarpaulin::report[0m[2m:[0m Coverage Results:
+[2m2026-09-10T04:50:07.554423Z[0m [32m INFO[0m [2mcargo_tarpaulin::report::html[0m[2m:[0m HTML report written to /home/runner/work/game-systems-web/game-systems-web/coverage/tarpaulin-report.html
 || Tested/Total Lines:
 || src/build_info.rs: 23/23
 || src/catalog_client.rs: 27/33
 || src/config.rs: 13/13
-|| src/game_systems_client.rs: 61/77
+|| src/game_systems_client.rs: 63/79
 || src/i18n.rs: 19/111
 || src/main.rs: 0/42
 || src/routes/health.rs: 0/6
@@ -66,4 +67,4 @@ test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
 || src/session_client.rs: 23/51
 || src/telemetry.rs: 0/27
 || 
-40.12% coverage, 260/648 lines covered
+40.31% coverage, 262/650 lines covered
