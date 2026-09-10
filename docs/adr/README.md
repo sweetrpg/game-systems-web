@@ -49,3 +49,4 @@ scaffolds one.
 | ADR | Title | Status |
 | --- | --- | --- |
 | [0000](0000-template.md) | Template | - |
+| [0001](0001-publisher-lookup-via-catalog-api.md) | Publisher lookup via catalog-api | accepted |

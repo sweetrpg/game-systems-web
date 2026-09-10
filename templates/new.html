@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}{{ chrome.tr.new_title() }}{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h2>{{ chrome.tr.new_title() }}</h2>
+    <h2>{{ page_title }}</h2>
 </div>
 
 {% match error %}
@@ -23,8 +23,11 @@
     <label class="form-label" for="edition">{{ chrome.tr.new_field_edition() }}</label>
     <input class="input" type="text" id="edition" name="edition" value="{{ form.edition }}">
 
-    <label class="form-label" for="publisher_id">{{ chrome.tr.new_field_publisher() }}</label>
-    <input class="input" type="text" id="publisher_id" name="publisher_id" value="{{ form.publisher_id }}">
+    <label class="form-label" for="publisher_name">{{ chrome.tr.new_field_publisher() }}</label>
+    <input class="input" type="text" id="publisher_name" name="publisher_name" value="{{ form.publisher_name }}"
+           list="publisher_options" autocomplete="off">
+    <datalist id="publisher_options"></datalist>
+    <input type="hidden" id="publisher_id" name="publisher_id" value="{{ form.publisher_id }}">
 
     <label class="form-label" for="notes">{{ chrome.tr.new_field_notes() }}</label>
     <textarea class="input" id="notes" name="notes">{{ form.notes }}</textarea>
@@ -33,7 +36,46 @@
     <input class="input" type="text" id="tags" name="tags" value="{{ form.tags }}">
 
     <div class="form-actions">
-        <button class="btn btn-primary" type="submit">{{ chrome.tr.new_submit() }}</button>
+        <button class="btn btn-primary" type="submit">{{ submit_label }}</button>
     </div>
 </form>
+
+<script>
+// Publisher name picker. Enhancement only: with JS off, the typed name is resolved to an id
+// server-side in submit_new (ponytail: name->id resolve is the no-JS fallback).
+(function () {
+  var nameInput = document.getElementById('publisher_name');
+  var idInput = document.getElementById('publisher_id');
+  var list = document.getElementById('publisher_options');
+  var timer;
+  function syncId() {
+    var match = Array.prototype.find.call(list.options, function (o) {
+      return o.value.toLowerCase() === nameInput.value.trim().toLowerCase();
+    });
+    idInput.value = match ? match.dataset.id : '';
+  }
+  nameInput.addEventListener('input', function () {
+    syncId();
+    clearTimeout(timer);
+    var q = nameInput.value.trim();
+    if (q.length < 2) { return; }
+    timer = setTimeout(function () {
+      fetch('{{ chrome.base_path }}/new/publishers?q=' + encodeURIComponent(q), { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (rows) {
+          list.innerHTML = '';
+          rows.forEach(function (row) {
+            var opt = document.createElement('option');
+            opt.value = row.name;
+            opt.dataset.id = row.id;
+            list.appendChild(opt);
+          });
+          syncId();
+        })
+        .catch(function () {});
+    }, 250);
+  });
+  nameInput.addEventListener('change', syncId);
+})();
+</script>
 {% endblock %}

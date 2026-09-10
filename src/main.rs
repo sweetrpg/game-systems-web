@@ -1,4 +1,5 @@
 mod build_info;
+mod catalog_client;
 mod config;
 mod game_systems_client;
 mod i18n;
@@ -14,6 +15,7 @@ use axum::routing::get;
 use axum::Router;
 use axum_prometheus::PrometheusMetricLayer;
 use build_info::BuildInfo;
+use catalog_client::CatalogClient;
 use config::Config;
 use game_systems_client::GameSystemsApiClient;
 use session_client::SessionClient;
@@ -25,6 +27,7 @@ pub struct AppState {
     pub build_info: BuildInfo,
     pub session_client: SessionClient,
     pub api: GameSystemsApiClient,
+    pub catalog: CatalogClient,
 }
 
 #[tokio::main]
@@ -50,12 +53,14 @@ async fn main() {
     )
     .await;
     let api = GameSystemsApiClient::new(config.game_systems_api_url.clone());
+    let catalog = CatalogClient::new(config.catalog_api_url.clone());
 
     let state = Arc::new(AppState {
         config,
         build_info,
         session_client,
         api,
+        catalog,
     });
 
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
