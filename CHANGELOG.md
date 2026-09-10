@@ -1,4 +1,15 @@
 
+## 0.5.0 - 2026-09-10
+
+### Added
+- Publisher name lookup, role-aware wording, short build hash
+
+
+### Fixed
+- Tolerate null tags in game-systems-api responses
+
+
+
 ## 0.4.0 - 2026-09-09
 
 ### Added
