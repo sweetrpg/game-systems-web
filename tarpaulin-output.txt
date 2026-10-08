@@ -1,9 +1,9 @@
-[2m2026-09-10T04:58:12.016228Z[0m [32m INFO[0m [2mcargo_tarpaulin::config[0m[2m:[0m Creating config
-[2m2026-09-10T04:58:12.888107Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Running Tarpaulin
-[2m2026-09-10T04:58:12.888122Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Building project
-[2m2026-09-10T04:58:12.899818Z[0m [32m INFO[0m [2mcargo_tarpaulin::cargo[0m[2m:[0m Cleaning project
-[2m2026-09-10T04:59:50.112445Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m running /home/runner/work/game-systems-web/game-systems-web/target/debug/deps/sweetrpg_game_systems_web-fca319276729ae4a
-[2m2026-09-10T04:59:50.112559Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m Setting LLVM_PROFILE_FILE
+[2m2026-10-08T02:40:06.075041Z[0m [32m INFO[0m [2mcargo_tarpaulin::config[0m[2m:[0m Creating config
+[2m2026-10-08T02:40:07.250357Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Running Tarpaulin
+[2m2026-10-08T02:40:07.250375Z[0m [32m INFO[0m [2mcargo_tarpaulin[0m[2m:[0m Building project
+[2m2026-10-08T02:40:07.262217Z[0m [32m INFO[0m [2mcargo_tarpaulin::cargo[0m[2m:[0m Cleaning project
+[2m2026-10-08T02:41:43.241577Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m running /home/runner/work/game-systems-web/game-systems-web/target/debug/deps/sweetrpg_game_systems_web-fca319276729ae4a
+[2m2026-10-08T02:41:43.241680Z[0m [32m INFO[0m [2mcargo_tarpaulin::process_handling[0m[2m:[0m Setting LLVM_PROFILE_FILE
 
 running 40 tests
 test build_info::tests::leaves_bare_version_unchanged ... ok
@@ -49,22 +49,22 @@ test session_client::tests::unreachable_redis_fails_open_with_a_password_configu
 
 test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 37.82s
 
-[2m2026-09-10T05:00:27.941460Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m For binary: target/debug/deps/sweetrpg_game_systems_web-fca319276729ae4a
-[2m2026-09-10T05:00:27.941479Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Generated: target/tarpaulin/profraws/sweetrpg_game_systems_web-fca319276729ae4a_1708338966092721986_0-16615.profraw
-[2m2026-09-10T05:00:27.941486Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Merging coverage reports
-[2m2026-09-10T05:00:28.085410Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Mapping coverage data to source
-[2m2026-09-10T05:00:28.679600Z[0m [32m INFO[0m [2mcargo_tarpaulin::report[0m[2m:[0m Coverage Results:
-[2m2026-09-10T05:00:28.680544Z[0m [32m INFO[0m [2mcargo_tarpaulin::report::html[0m[2m:[0m HTML report written to /home/runner/work/game-systems-web/game-systems-web/coverage/tarpaulin-report.html
+[2m2026-10-08T02:42:21.074230Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m For binary: target/debug/deps/sweetrpg_game_systems_web-fca319276729ae4a
+[2m2026-10-08T02:42:21.074249Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Generated: target/tarpaulin/profraws/sweetrpg_game_systems_web-fca319276729ae4a_1707386791172648770_0-16719.profraw
+[2m2026-10-08T02:42:21.074255Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Merging coverage reports
+[2m2026-10-08T02:42:21.212596Z[0m [32m INFO[0m [2mcargo_tarpaulin::statemachine::instrumented[0m[2m:[0m Mapping coverage data to source
+[2m2026-10-08T02:42:21.429823Z[0m [32m INFO[0m [2mcargo_tarpaulin::report[0m[2m:[0m Coverage Results:
+[2m2026-10-08T02:42:21.430970Z[0m [32m INFO[0m [2mcargo_tarpaulin::report::html[0m[2m:[0m HTML report written to /home/runner/work/game-systems-web/game-systems-web/coverage/tarpaulin-report.html
 || Tested/Total Lines:
 || src/build_info.rs: 23/23
 || src/catalog_client.rs: 27/33
-|| src/config.rs: 13/13
+|| src/config.rs: 14/14
 || src/game_systems_client.rs: 63/79
-|| src/i18n.rs: 19/111
+|| src/i18n.rs: 19/113
 || src/main.rs: 0/42
 || src/routes/health.rs: 0/6
-|| src/routes/systems.rs: 94/265
+|| src/routes/systems.rs: 94/266
 || src/session_client.rs: 23/51
 || src/telemetry.rs: 0/27
 || 
-40.31% coverage, 262/650 lines covered
+40.21% coverage, 263/654 lines covered
