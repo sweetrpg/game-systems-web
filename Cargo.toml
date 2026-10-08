@@ -14,7 +14,7 @@ chrono = { version = "0.4", default-features = false, features = ["serde", "std"
 md5 = "0.8"
 opentelemetry = "0.32"
 opentelemetry-otlp = { version = "0.32", default-features = false, features = ["http-proto", "reqwest-client"] }
-opentelemetry_sdk = { version = "0.32", features = ["rt-tokio"] }
+opentelemetry_sdk = { version = "0.33", features = ["rt-tokio"] }
 redis = { version = "1.5", features = ["tokio-comp", "connection-manager"] }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 rust-i18n = "4.2"
