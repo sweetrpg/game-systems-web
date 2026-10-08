@@ -1,4 +1,15 @@
 
+## 0.6.0 - 2026-10-08
+
+### Added
+- Embed shared-web feedback widget in avatar menu
+
+
+### Fixed
+- Shorten avatar-menu label to Feedback...
+
+
+
 ## 0.5.0 - 2026-09-10
 
 ### Added
