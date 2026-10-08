@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ chrome.shared_url }}/static/css/main.css">
     <link rel="stylesheet" href="{{ chrome.shared_url }}/static/css/avatar-menu.css">
     <link rel="stylesheet" href="{{ chrome.shared_url }}/static/css/app-switcher.css">
+    <link rel="stylesheet" href="{{ chrome.shared_url }}/static/css/feedback-widget.css">
     <script>
     (function () {
       var stored = null;
@@ -66,7 +67,11 @@
                 {% if chrome.is_admin %}
                 <a class="avatar-menu-item" href="/admin">{{ chrome.tr.menu_administration() }}</a>
                 {% endif %}
+                {% endif %}
                 <hr class="avatar-menu-divider">
+                <button type="button" id="feedback-trigger" class="avatar-menu-item">{{ chrome.tr.menu_feedback() }}</button>
+                <hr class="avatar-menu-divider">
+                {% if chrome.is_authed %}
                 <form action="{{ chrome.logout_url }}" method="post" class="avatar-menu-item-form">
                     <button type="submit" class="avatar-menu-item avatar-menu-item-danger">{{ chrome.tr.menu_log_out() }}</button>
                 </form>
@@ -98,5 +103,8 @@
     <script src="{{ chrome.shared_url }}/static/js/avatar-menu.js" defer></script>
     <script src="{{ chrome.shared_url }}/static/js/app-switcher.js" defer></script>
     <script src="{{ chrome.shared_url }}/static/js/theme.js" defer></script>
+    <script src="{{ chrome.shared_url }}/static/js/feedback-widget.js"
+            data-api-url="{{ chrome.feedback_api_url }}"
+            data-trigger-selector="#feedback-trigger" defer></script>
 </body>
 </html>
