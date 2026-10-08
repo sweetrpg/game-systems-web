@@ -78,6 +78,9 @@ impl Tr {
     pub fn menu_administration(&self) -> String {
         self.s("menu.administration")
     }
+    pub fn menu_feedback(&self) -> String {
+        self.s("menu.feedback")
+    }
     pub fn menu_theme(&self) -> String {
         self.s("menu.theme")
     }
