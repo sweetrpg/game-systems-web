@@ -53,6 +53,7 @@ fn logout_url(return_to: &str) -> String {
 struct Chrome {
     shared_url: String,
     base_path: &'static str,
+    feedback_api_url: String,
     is_authed: bool,
     avatar_initial: String,
     /// Gravatar URL from the session email, or empty. `d=404` so a visitor with no Gravatar
@@ -87,6 +88,7 @@ impl Chrome {
         Self {
             shared_url: state.config.shared_url.clone(),
             base_path: BASE_PATH,
+            feedback_api_url: state.config.feedback_api_url.clone(),
             is_authed: user.is_some(),
             avatar_initial: user
                 .and_then(|u| u.name.chars().next())

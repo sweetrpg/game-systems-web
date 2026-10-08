@@ -15,6 +15,13 @@ pub struct Config {
     /// per `docs/deployment-conventions.md` - the same target every other frontend's
     /// `CATALOG_API_URL` uses. See `docs/adr/0001-publisher-lookup-via-catalog-api.md`.
     pub catalog_api_url: Option<String>,
+    /// URL for `admin-api`'s feedback endpoint, used by the browser-side feedback widget's
+    /// `data-api-url` attribute. Defaults to a path-only value: every API on this platform is
+    /// exposed under the *same* `dev.sweetrpg.com` host as every frontend, at
+    /// `/api/0/<package>` (see `docs/deployment-conventions.md`'s "API Ingress path
+    /// versioning") - so this call is same-origin from the browser's perspective and needs no
+    /// host/scheme of its own. Matches `main-web`'s `FEEDBACK_API_URL`.
+    pub feedback_api_url: String,
     pub otlp_endpoint: Option<String>,
     pub log_level: String,
     /// Host of the shared session Redis instance `auth-web` owns - this app only ever reads it,
@@ -45,6 +52,8 @@ impl Config {
             game_systems_api_url: env::var("GAME_SYSTEMS_API_URL")
                 .unwrap_or_else(|_| "http://localhost:8000".to_string()),
             catalog_api_url: env::var("CATALOG_API_URL").ok().filter(|v| !v.is_empty()),
+            feedback_api_url: env::var("FEEDBACK_API_URL")
+                .unwrap_or_else(|_| "/api/0/admin/feedback".to_string()),
             otlp_endpoint: env::var("OTEL_EXPORTER_OTLP_ENDPOINT").ok(),
             log_level: env::var("LOG_LEVEL").unwrap_or_else(|_| "info".to_string()),
             shared_session_redis_host: env::var("SHARED_SESSION_REDIS_HOST")
