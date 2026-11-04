@@ -1,4 +1,11 @@
 
+## 0.7.0 - 2026-11-04
+
+### Added
+- Use the standard three-line footer
+
+
+
 ## 0.6.0 - 2026-10-08
 
 ### Added
