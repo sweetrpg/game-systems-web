@@ -9,6 +9,7 @@ use axum::Form;
 use axum::Json;
 use axum::Router;
 use axum_extra::extract::CookieJar;
+use chrono::Datelike;
 use serde::{Deserialize, Serialize};
 
 use crate::catalog_client::Publisher;
@@ -68,6 +69,13 @@ struct Chrome {
     version: String,
     build_timestamp: String,
     build_hash: String,
+    /// Current year for the footer copyright line.
+    year: i32,
+    /// Footer legal links point at the site root (`main-web` serves them), never at
+    /// `base_path`.
+    terms_path: &'static str,
+    privacy_path: &'static str,
+    support_path: &'static str,
     tr: Tr,
 }
 
@@ -113,6 +121,10 @@ impl Chrome {
                 .get(..8)
                 .unwrap_or(&state.build_info.sha)
                 .to_string(),
+            year: chrono::Utc::now().year(),
+            terms_path: "/terms",
+            privacy_path: "/privacy",
+            support_path: "/support",
             tr,
         }
     }
@@ -910,5 +922,60 @@ mod tests {
             .and_then(|v| v.to_str().ok())
             .unwrap_or_default();
         assert!(location.starts_with("/auth/login?return_to="));
+    }
+
+    #[derive(Template)]
+    #[template(source = r#"{% include "partials/footer.html" %}"#, ext = "html")]
+    struct FooterProbe {
+        chrome: Chrome,
+    }
+
+    fn footer_html() -> String {
+        let chrome = Chrome {
+            shared_url: String::new(),
+            base_path: BASE_PATH,
+            feedback_api_url: String::new(),
+            is_authed: false,
+            avatar_initial: String::new(),
+            gravatar_url: String::new(),
+            user_name: String::new(),
+            user_email: String::new(),
+            is_admin: false,
+            login_url: String::new(),
+            logout_url: String::new(),
+            version: "1.2.3".into(),
+            build_timestamp: "2026-11-03".into(),
+            build_hash: "deadbeef".into(),
+            year: 2026,
+            terms_path: "/terms",
+            privacy_path: "/privacy",
+            support_path: "/support",
+            tr: Tr::english(),
+        };
+        FooterProbe { chrome }.render().expect("footer renders")
+    }
+
+    #[test]
+    fn footer_has_three_lines_in_order() {
+        let html = footer_html();
+        let copyright = html
+            .find("&copy; 2026 Pilgrimage Software")
+            .expect("line 1");
+        let links = html.find("Terms of Service").expect("line 2");
+        let build = html
+            .find("v1.2.3 &middot; built 2026-11-03 / deadbeef")
+            .expect("line 3");
+        assert!(copyright < links && links < build);
+        assert_eq!(html.matches("footer-line").count(), 3);
+        assert!(html.contains(r#"footer-line footer-build"#));
+    }
+
+    #[test]
+    fn footer_legal_links_point_at_the_site_root_not_the_app_prefix() {
+        let html = footer_html();
+        assert!(html.contains(r#"href="/terms">Terms of Service</a>"#));
+        assert!(html.contains(r#"href="/privacy">Privacy Policy</a>"#));
+        assert!(html.contains(r#"href="/support">Support</a>"#));
+        assert!(!html.contains("/game-systems/terms"));
     }
 }
