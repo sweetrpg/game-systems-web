@@ -92,13 +92,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="footer">
-        <div class="footer-links">
-            <span>&copy; 2026 Pilgrimage Software</span>
-            <a href="https://github.com/sweetrpg" target="_blank" rel="noopener">GitHub</a>
-        </div>
-        <span class="footer-build">v{{ chrome.version }} &middot; built {{ chrome.build_timestamp }} / {{ chrome.build_hash }}</span>
-    </footer>
+    {% include "partials/footer.html" %}
 
     <script src="{{ chrome.shared_url }}/static/js/avatar-menu.js" defer></script>
     <script src="{{ chrome.shared_url }}/static/js/app-switcher.js" defer></script>

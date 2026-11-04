@@ -63,6 +63,15 @@ impl Tr {
     pub fn site_title(&self) -> String {
         self.s("site.title")
     }
+    pub fn footer_terms(&self) -> String {
+        self.s("footer.terms")
+    }
+    pub fn footer_privacy(&self) -> String {
+        self.s("footer.privacy")
+    }
+    pub fn footer_support(&self) -> String {
+        self.s("footer.support")
+    }
     pub fn menu_log_in(&self) -> String {
         self.s("menu.log_in")
     }
