@@ -9,10 +9,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-ALLOWED='SweetRPG|GitHub|Pilgrimage Software|^Sweet$|^RPG$|^v\s*(&middot;|·)?\s*built'
+ALLOWED='SweetRPG|GitHub|Pilgrimage Software|^Sweet$|^RPG$|^\s*&middot;\s*$|^v\s*(&middot;|·)?\s*built'
 status=0
 
-for template in templates/*.html; do
+for template in templates/*.html templates/partials/*.html; do
     # Strip askama blocks/expressions, then report any remaining text between tags.
     violations=$(
         perl -0777 -pe 's/<script.*?<\/script>//gs; s/\{%.*?%\}//gs; s/\{\{.*?\}\}//gs' "$template" |

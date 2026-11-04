@@ -3,6 +3,10 @@
 # Keys are namespaced by template/feature.
 site:
   title: Game Systems
+footer:
+  terms: Terms of Service
+  privacy: Privacy Policy
+  support: Support
 menu:
   log_in: Log in
   log_out: Log out
